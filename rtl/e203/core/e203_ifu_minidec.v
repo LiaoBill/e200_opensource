@@ -36,24 +36,34 @@ module e203_ifu_minidec(
 
   //////////////////////////////////////////////////////////////
   // The IR stage to Decoder
+  //传入的指令
   input  [`E203_INSTR_SIZE-1:0] instr,
   
   //////////////////////////////////////////////////////////////
   // The Decoded Info-Bus
 
 
+  //源操作数1使能信号
   output dec_rs1en,
+  //源操作数2使能信号
   output dec_rs2en,
+  //源操作数1序号
   output [`E203_RFIDX_WIDTH-1:0] dec_rs1idx,
+  //源操作数2序号
   output [`E203_RFIDX_WIDTH-1:0] dec_rs2idx,
 
+  //mulhsu 指令将操作数寄存器 rsl 与 rs2 中的 32 位整数相乘，其中 rsl 和 rs2 中的值分别被当作有符号数和无符号数，将结果的高 32 位写回寄存器 rd 中。
   output dec_mulhsu,
+  //指令将操作数寄存器 rsl 与 rs2 中的 32 位整数相乘，将结果的低 32 位写回寄存器 rd 中 
   output dec_mul   ,
+  //除法
   output dec_div   ,
+  //余数
   output dec_rem   ,
   output dec_divu  ,
   output dec_remu  ,
 
+  //32位指令
   output dec_rv32,
   output dec_bjp,
   output dec_jal,

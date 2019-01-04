@@ -365,10 +365,12 @@ module e203_ifu_ifetch(
   //////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////
   // Next PC generation
+  //是不是跳转指令
   wire minidec_bjp;
   wire minidec_jal;
   wire minidec_jalr;
   wire minidec_bxx;
+  //跳转指令的立即数
   wire [`E203_XLEN-1:0] minidec_bjp_imm;
 
   // The mini-decoder to check instruciton length and branch type 

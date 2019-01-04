@@ -77,7 +77,7 @@
 
 `define E203_INSTR_SIZE    32
 
-//
+//通用寄存器个数
 `define E203_RFIDX_WIDTH   5
 `ifdef E203_CFG_REGNUM_IS_32//{
   `define E203_RFREG_NUM_IS_32 
