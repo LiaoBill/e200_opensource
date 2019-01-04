@@ -67,21 +67,35 @@ module e203_ifu_ifetch(
   //////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////
   // The IR stage to EXU interface
+  //输出给EXU的IR
   output [`E203_INSTR_SIZE-1:0] ifu_o_ir,// The instruction register
+  //输出给EXU的PC
   output [`E203_PC_SIZE-1:0] ifu_o_pc,   // The PC register along with
+  //输出给EXU的PC是否合法
   output ifu_o_pc_vld,
+  //输出给EXU的rs1的序号
   output [`E203_RFIDX_WIDTH-1:0] ifu_o_rs1idx,
+  //输出给EXU的rs2的序号
   output [`E203_RFIDX_WIDTH-1:0] ifu_o_rs2idx,
+  //预测分支是否跳转
   output ifu_o_prdt_taken,               // The Bxx is predicted as taken
+  //取指的时候是否有未对齐错误
   output ifu_o_misalgn,                  // The fetch misalign 
+  //取指的时候是否有总线错误
   output ifu_o_buserr,                   // The fetch bus error
   output ifu_o_muldiv_b2b,               // The mul/div back2back case
+  //和EXU阶段的握手信号，当前模块是否可用
   output ifu_o_valid, // Handshake signals with EXU stage
+  //和EXU阶段的握手信号，
   input  ifu_o_ready,
 
+  //流水线冲刷响应
   output  pipe_flush_ack,
+  //流水线冲刷请求
   input   pipe_flush_req,
+  //流水线冲刷的操作数1
   input   [`E203_PC_SIZE-1:0] pipe_flush_add_op1,  
+  //流水线冲刷的操作数2
   input   [`E203_PC_SIZE-1:0] pipe_flush_add_op2,
   `ifdef E203_TIMING_BOOST//}
   input   [`E203_PC_SIZE-1:0] pipe_flush_pc,  
@@ -97,12 +111,18 @@ module e203_ifu_ifetch(
   output ifu_halt_ack,
 
 
+  //oitf是否为空，oitf用于保存长指令的信息
   input  oitf_empty,
+  //从寄存器文件硬连线的x1的值
   input  [`E203_XLEN-1:0] rf2ifu_x1,
   input  [`E203_XLEN-1:0] rf2ifu_rs1,
+  //从译码器来的rs1使能信号
   input  dec2ifu_rs1en,
+  //从译码器来的rd使能信号
   input  dec2ifu_rden,
+  //从译码器来的rd序号
   input  [`E203_RFIDX_WIDTH-1:0] dec2ifu_rdidx,
+  //译码结果，是否是乘除法操作(长指令)
   input  dec2ifu_mulhsu,
   input  dec2ifu_div   ,
   input  dec2ifu_rem   ,
@@ -113,6 +133,7 @@ module e203_ifu_ifetch(
   input  rst_n
   );
 
+  //hsked: handshaked
   wire ifu_req_hsked  = (ifu_req_valid & ifu_req_ready) ;
   wire ifu_rsp_hsked  = (ifu_rsp_valid & ifu_rsp_ready) ;
   wire ifu_ir_o_hsked = (ifu_o_valid & ifu_o_ready) ;
@@ -254,6 +275,7 @@ module e203_ifu_ifetch(
      // IFU-IR and IFU-PC as the datapath register, only loaded and toggle when the valid reg is set
   wire ifu_err_r;
   sirv_gnrl_dfflr #(1) ifu_err_dfflr(ir_valid_set, ifu_err_nxt, ifu_err_r, clk, rst_n);
+  //分支预测的结果(是否跳转)
   wire prdt_taken;  
   wire ifu_prdt_taken_r;
   sirv_gnrl_dfflr #(1) ifu_prdt_taken_dfflr (ir_valid_set, prdt_taken, ifu_prdt_taken_r, clk, rst_n);
@@ -262,18 +284,24 @@ module e203_ifu_ifetch(
   sirv_gnrl_dfflr #(1) ir_muldiv_b2b_dfflr (ir_valid_set, ifu_muldiv_b2b_nxt, ifu_muldiv_b2b_r, clk, rst_n);
      //To save power the H-16bits only loaded when it is 32bits length instru 
   wire [`E203_INSTR_SIZE-1:0] ifu_ir_r;// The instruction register
+  //mini-decoder解码的是32位指令还是16位指令
   wire minidec_rv32;
   wire ir_hi_ena = ir_valid_set & minidec_rv32;
   wire ir_lo_ena = ir_valid_set;
   sirv_gnrl_dfflr #(`E203_INSTR_SIZE/2) ifu_hi_ir_dfflr (ir_hi_ena, ifu_ir_nxt[31:16], ifu_ir_r[31:16], clk, rst_n);
   sirv_gnrl_dfflr #(`E203_INSTR_SIZE/2) ifu_lo_ir_dfflr (ir_lo_ena, ifu_ir_nxt[15: 0], ifu_ir_r[15: 0], clk, rst_n);
 
+  //mini-decoder解码得到的rs1的使能信号
   wire minidec_rs1en;
+  //mini-decoder解码得到的rs2的使能信号
   wire minidec_rs2en;
+  //mini-decoder解码得到的rs1的序号
   wire [`E203_RFIDX_WIDTH-1:0] minidec_rs1idx;
+  //mini-decoder解码得到的rs2的序号
   wire [`E203_RFIDX_WIDTH-1:0] minidec_rs2idx;
 
   `ifndef E203_HAS_FPU//}
+  //如果没有浮点运算单元则将相应的值全部设置为0
   wire minidec_fpu        = 1'b0;
   wire minidec_fpu_rs1en  = 1'b0;
   wire minidec_fpu_rs2en  = 1'b0;
@@ -307,8 +335,11 @@ module e203_ifu_ifetch(
     // with 16-bit aligned instructions, such as the compressed instruction set extension, C.
   assign ifu_o_misalgn = 1'b0;// Never happen in RV32C configuration 
   assign ifu_o_buserr  = ifu_err_r;
+  //输出的rs1序号等于输入的rs1序号
   assign ifu_o_rs1idx = ir_rs1idx_r;
+  //输出的rs2序号等于输入的rs2序号
   assign ifu_o_rs2idx = ir_rs2idx_r;
+  //输出的预测是否跳转
   assign ifu_o_prdt_taken = ifu_prdt_taken_r;
   assign ifu_o_muldiv_b2b = ifu_muldiv_b2b_r;
 
@@ -325,6 +356,7 @@ module e203_ifu_ifetch(
   wire ir_rs1en = dec2ifu_rs1en;
   wire ir_rden = dec2ifu_rden;
   wire [`E203_RFIDX_WIDTH-1:0] ir_rdidx = dec2ifu_rdidx;
+  //mini-decoder解码指令得到的jalr使用的源寄存器rs1的序号
   wire [`E203_RFIDX_WIDTH-1:0] minidec_jalr_rs1idx;
   wire jalr_rs1idx_cam_irrdidx = ir_rden & (minidec_jalr_rs1idx == ir_rdidx) & ir_valid_r;
 
@@ -333,6 +365,7 @@ module e203_ifu_ifetch(
   // MULDIV BACK2BACK Fusing
   // To detect the sequence of MULH[[S]U] rdh, rs1, rs2;    MUL rdl, rs1, rs2
   // To detect the sequence of     DIV[U] rdq, rs1, rs2; REM[U] rdr, rs1, rs2  
+  //mini-decoder解码得到的结果是不是乘除法
   wire minidec_mul ;
   wire minidec_div ;
   wire minidec_rem ;
@@ -367,8 +400,11 @@ module e203_ifu_ifetch(
   // Next PC generation
   //是不是跳转指令
   wire minidec_bjp;
+  //是不是立即数无条件跳转指令
   wire minidec_jal;
+  //是不是寄存器无条件跳转指令
   wire minidec_jalr;
+  //是不是条件跳转指令
   wire minidec_bxx;
   //跳转指令的立即数
   wire [`E203_XLEN-1:0] minidec_bjp_imm;
@@ -388,6 +424,7 @@ module e203_ifu_ifetch(
       .dec_jalr    (minidec_jalr       ),
       .dec_bxx     (minidec_bxx        ),
 
+      //不用的输出悬空
       .dec_mulhsu  (),
       .dec_mul     (minidec_mul ),
       .dec_div     (minidec_div ),
@@ -402,10 +439,14 @@ module e203_ifu_ifetch(
 
   );
 
+  //bpu是否需要等待
   wire bpu_wait;
+  //bpu输出的pc预测操作数1
   wire [`E203_PC_SIZE-1:0] prdt_pc_add_op1;  
+  //bpu输出的pc预测操作数2
   wire [`E203_PC_SIZE-1:0] prdt_pc_add_op2;
 
+  //分支预测器
   e203_ifu_litebpu u_e203_ifu_litebpu(
 
     .pc                       (pc_r),
@@ -423,11 +464,16 @@ module e203_ifu_ifetch(
     .ir_empty                 (ir_empty  ),
     .ir_rs1en                 (ir_rs1en  ),
 
+    //jalr_rs1idx_cam_irrdidx输入
     .jalr_rs1idx_cam_irrdidx  (jalr_rs1idx_cam_irrdidx),
-  
+
+    //bpu_wait输出
     .bpu_wait                 (bpu_wait       ),  
+    //bpu预测的是否跳转
     .prdt_taken               (prdt_taken     ),  
+    //bpu输出的pc预测操作数1
     .prdt_pc_add_op1          (prdt_pc_add_op1),  
+    //bpu输出的pc预测操作数2
     .prdt_pc_add_op2          (prdt_pc_add_op2),
 
     .bpu2rf_rs1_ena           (bpu2rf_rs1_ena),
@@ -437,12 +483,14 @@ module e203_ifu_ifetch(
     .clk                      (clk  ) ,
     .rst_n                    (rst_n )                 
   );
+
   // If the instruciton is 32bits length, increament 4, otherwise 2
   wire [2:0] pc_incr_ofst = minidec_rv32 ? 3'd4 : 3'd2;
 
   wire [`E203_PC_SIZE-1:0] pc_nxt_pre;
   wire [`E203_PC_SIZE-1:0] pc_nxt;
 
+  //如果是跳转指令并且预测跳转
   wire bjp_req = minidec_bjp & prdt_taken;
 
   wire ifetch_replay_req;
@@ -453,6 +501,7 @@ module e203_ifu_ifetch(
                                dly_pipe_flush_req  ? pc_r :
                             `endif//}
                                ifetch_replay_req  ? pc_r :
+                               //如果是跳转指令则使用bpu输出的第一个操作数
                                bjp_req ? prdt_pc_add_op1    :
                                ifu_reset_req   ? pc_rtvec :
                                                  pc_r;
@@ -463,14 +512,17 @@ module e203_ifu_ifetch(
                                dly_pipe_flush_req  ? `E203_PC_SIZE'b0 :
                             `endif//}
                                ifetch_replay_req  ? `E203_PC_SIZE'b0 :
+                               //如果是跳转指令则使用bpu输出的第一个操作数
                                bjp_req ? prdt_pc_add_op2    :
                                ifu_reset_req   ? `E203_PC_SIZE'b0 :
                                                  pc_incr_ofst ;
 
   assign ifu_req_seq = (~pipe_flush_req_real) & (~ifu_reset_req) & (~ifetch_replay_req) & (~bjp_req);
+  //是否为32位的取指请求
   assign ifu_req_seq_rv32 = minidec_rv32;
   assign ifu_req_last_pc = pc_r;
 
+  //新的pc-pre为两个操作数相加
   assign pc_nxt_pre = pc_add_op1 + pc_add_op2;
   `ifndef E203_TIMING_BOOST//}
   assign pc_nxt = {pc_nxt_pre[`E203_PC_SIZE-1:1],1'b0};

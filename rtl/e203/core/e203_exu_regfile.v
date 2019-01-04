@@ -33,28 +33,43 @@
 `include "e203_defines.v"
 
 module e203_exu_regfile(
+  //读取的第一个源寄存器rs1的序号
   input  [`E203_RFIDX_WIDTH-1:0] read_src1_idx,
+  //读取的第二个源寄存器rs2的序号
   input  [`E203_RFIDX_WIDTH-1:0] read_src2_idx,
+  //输出读取的第一个源寄存器rs1中的数据
   output [`E203_XLEN-1:0] read_src1_dat,
+  //输出读取的第二个源寄存器rs2中的数据
   output [`E203_XLEN-1:0] read_src2_dat,
 
+  //写使能信号
   input  wbck_dest_wen,
+  //写回的数据的寄存器的序号
   input  [`E203_RFIDX_WIDTH-1:0] wbck_dest_idx,
+  //写回的数据
   input  [`E203_XLEN-1:0] wbck_dest_dat,
 
+  //将x1的值硬连线连出
   output [`E203_XLEN-1:0] x1_r,
 
+  //是否为测试模式
   input  test_mode,
+  //时钟信号
   input  clk,
   input  rst_n
   );
 
+  //使用二维数组实现的寄存器文件
   wire [`E203_XLEN-1:0] rf_r [`E203_RFREG_NUM-1:0];
+  //每个寄存器的写使能信号
   wire [`E203_RFREG_NUM-1:0] rf_wen;
   
   `ifdef E203_REGFILE_LATCH_BASED //{
   // Use DFF to buffer the write-port
   wire [`E203_XLEN-1:0] wbck_dest_dat_r;
+
+  //sirv_gnrl_dffl(.lden(wbck_dest_wen), .dnxt(wbck_dest_dat), .qout(wbck_dest_dat_r), .clk(clk))
+  //              input(加载数据使能信号)   input(加载的数据)      output(保存的数据)     input(时钟信号)
   sirv_gnrl_dffl #(`E203_XLEN) wbck_dat_dffl (wbck_dest_wen, wbck_dest_dat, wbck_dest_dat_r, clk);
   wire [`E203_RFREG_NUM-1:0] clk_rf_ltch;
   `endif//}
@@ -67,13 +82,18 @@ module e203_exu_regfile(
   
         if(i==0) begin: rf0
             // x0 cannot be wrote since it is constant-zeros
+            //rf_wen[0]恒为0，因为x0中保存的是常数0
             assign rf_wen[i] = 1'b0;
+            //DFF: D flip-flop
+            //x0设置为E203_XLEN个0，这里不需要dff，节省掉一些硬件资源
             assign rf_r[i] = `E203_XLEN'b0;
           `ifdef E203_REGFILE_LATCH_BASED //{
+            //如果使用基于锁存器的寄存器文件则将clk_rf_ltch[0]设置为0
             assign clk_rf_ltch[i] = 1'b0;
           `endif//}
         end
         else begin: rfno0
+            //第i个寄存器的写使能信号
             assign rf_wen[i] = wbck_dest_wen & (wbck_dest_idx == i) ;
           `ifdef E203_REGFILE_LATCH_BASED //{
             e203_clkgate u_e203_clkgate(
@@ -82,17 +102,24 @@ module e203_exu_regfile(
               .clock_en(rf_wen[i]),
               .clk_out (clk_rf_ltch[i])
             );
+
+            //如果是使用锁存器的配置，则例化锁存器实现通用寄存器
                 //from write-enable to clk_rf_ltch to rf_ltch
             sirv_gnrl_ltch #(`E203_XLEN) rf_ltch (clk_rf_ltch[i], wbck_dest_dat_r, rf_r[i]);
           `else//}{
+            //
             sirv_gnrl_dffl #(`E203_XLEN) rf_dffl (rf_wen[i], wbck_dest_dat, rf_r[i], clk);
+            //sirv_gnrl_dffl(.lden(rf_wen[i]), .dnxt(wbck_dest_dat), .qout(rf_r[i]), .clk(clk))
+            //              input(加载数据使能信号)   input(加载的数据)  output(保存的数据)     input(时钟信号)
+            //              为1时能够写寄存器         要写入的数据      将寄存器中保存的放到rf_r[i]上
           `endif//}
         end
   
       end//}
   endgenerate//}
-  
+  //读取rs1对应的数据
   assign read_src1_dat = rf_r[read_src1_idx];
+  //读取rs2对应的数据
   assign read_src2_dat = rf_r[read_src2_idx];
   
  // wire  [`E203_XLEN-1:0] x0  = rf_r[0];
@@ -130,6 +157,7 @@ module e203_exu_regfile(
  // wire  [`E203_XLEN-1:0] x31 = rf_r[31];
  // `endif//}
 
+  //硬连线将x1的值连出
   assign x1_r = rf_r[1];
       
 endmodule
