@@ -60,23 +60,31 @@ module e203_ifu_minidec(
   output dec_div   ,
   //余数
   output dec_rem   ,
+  //无符号除法
   output dec_divu  ,
   output dec_remu  ,
 
-  //32位指令
+  //是否为32位指令
   output dec_rv32,
+  //是否为跳转指令
   output dec_bjp,
+  //是否为立即数无条件跳转指令
   output dec_jal,
+  //是否为寄存器无条件跳转指令
   output dec_jalr,
+  //是否为条件跳转指令
   output dec_bxx,
+  //寄存器无条件跳转指令的寄存器序号
   output [`E203_RFIDX_WIDTH-1:0] dec_jalr_rs1idx,
+  //跳转的立即数
   output [`E203_XLEN-1:0] dec_bjp_imm 
 
   );
 
   e203_exu_decode u_e203_exu_decode(
-
+  //输入指令
   .i_instr(instr),
+  //不需要的输入的信息置零
   .i_pc(`E203_PC_SIZE'b0),
   .i_prdt_taken(1'b0), 
   .i_muldiv_b2b(1'b0), 
@@ -86,23 +94,29 @@ module e203_ifu_minidec(
 
   .dbg_mode  (1'b0),
 
+  //不需要的输出的信息悬空
   .dec_misalgn(),
   .dec_buserr(),
   .dec_ilegl(),
 
   .dec_rs1x0(),
   .dec_rs2x0(),
+  //rs1使能信号
   .dec_rs1en(dec_rs1en),
+  //rs2使能信号
   .dec_rs2en(dec_rs2en),
   .dec_rdwen(),
+  //rs1序号
   .dec_rs1idx(dec_rs1idx),
+  //rs2序号
   .dec_rs2idx(dec_rs2idx),
+  //不需要的输出的信息悬空
   .dec_rdidx(),
   .dec_info(),  
   .dec_imm(),
   .dec_pc(),
 
-  
+  //判断操作的类型
   .dec_mulhsu(dec_mulhsu),
   .dec_mul   (dec_mul   ),
   .dec_div   (dec_div   ),
@@ -110,13 +124,20 @@ module e203_ifu_minidec(
   .dec_divu  (dec_divu  ),
   .dec_remu  (dec_remu  ),
 
+  //是否是32位指令
   .dec_rv32(dec_rv32),
+  //是否是跳转指令
   .dec_bjp (dec_bjp ),
+  //是否为立即数无条件跳转指令
   .dec_jal (dec_jal ),
+  //是否为寄存器无条件跳转指令
   .dec_jalr(dec_jalr),
+  //是否为条件跳转指令
   .dec_bxx (dec_bxx ),
 
+  //寄存器无条件跳转指令的寄存器序号
   .dec_jalr_rs1idx(dec_jalr_rs1idx),
+  //跳转的立即数
   .dec_bjp_imm    (dec_bjp_imm    )  
   );
 
