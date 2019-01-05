@@ -32,6 +32,7 @@
 // ====================================================================
 `include "e203_defines.v"
 
+// load store unit
 module e203_lsu(
   input  commit_mret,
   input  commit_trap,

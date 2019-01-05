@@ -33,6 +33,7 @@
 // ====================================================================
 `include "e203_defines.v"
 
+// dispatch
 module e203_exu_disp(
   input  wfi_halt_exu_req,
   output wfi_halt_exu_ack,

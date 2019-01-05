@@ -1,21 +1,21 @@
- /*                                                                      
- Copyright 2017 Silicon Integrated Microelectronics, Inc.                
-                                                                         
- Licensed under the Apache License, Version 2.0 (the "License");         
- you may not use this file except in compliance with the License.        
- You may obtain a copy of the License at                                 
-                                                                         
-     http://www.apache.org/licenses/LICENSE-2.0                          
-                                                                         
-  Unless required by applicable law or agreed to in writing, software    
- distributed under the License is distributed on an "AS IS" BASIS,       
+ /*
+ Copyright 2017 Silicon Integrated Microelectronics, Inc.
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- See the License for the specific language governing permissions and     
- limitations under the License.                                          
- */                                                                      
-                                                                         
-                                                                         
-                                                                         
+ See the License for the specific language governing permissions and
+ limitations under the License.
+ */
+
+
+
 //=====================================================================
 //--        _______   ___
 //--       (   ____/ /__/
@@ -45,7 +45,7 @@ module e203_cpu_top(
 
   output core_csr_clk         ,
 
-    
+
 
     // If this signal is high, then indicate the Core have executed WFI instruction
     //   and entered into the sleep state
@@ -62,7 +62,7 @@ module e203_cpu_top(
   ///////////////////////////////////////
   // The interface to Debug Module: Begin
   //
-    // The synced debug interrupt back to Debug module 
+    // The synced debug interrupt back to Debug module
   output  dbg_irq_r,
 
     // The debug mode CSR registers control interface from/to Debug module
@@ -89,7 +89,7 @@ module e203_cpu_top(
 
 
     // This signal can be used to indicate the HART ID for this core
-  input  [`E203_HART_ID_W-1:0] core_mhartid,  
+  input  [`E203_HART_ID_W-1:0] core_mhartid,
 
     // The External Interrupt signal from PLIC
   input  ext_irq_a,
@@ -97,21 +97,21 @@ module e203_cpu_top(
   input  sft_irq_a,
     // The Timer Interrupt signal from CLINT
   input  tmr_irq_a,
-  
-  
+
+
     // The PMU control signal from PMU to control the TCM Shutdown
   input tcm_sd,
     // The PMU control signal from PMU to control the TCM Deep-Sleep
   input tcm_ds,
-    
+
   `ifdef E203_HAS_ITCM_EXTITF //{
   //////////////////////////////////////////////////////////////
   // External interface (ICB) to access ITCM: Begin
   //    * Bus cmd channel
   input                          ext2itcm_icb_cmd_valid,
   output                         ext2itcm_icb_cmd_ready,
-  input  [`E203_ITCM_ADDR_WIDTH-1:0]   ext2itcm_icb_cmd_addr, 
-  input                          ext2itcm_icb_cmd_read, 
+  input  [`E203_ITCM_ADDR_WIDTH-1:0]   ext2itcm_icb_cmd_addr,
+  input                          ext2itcm_icb_cmd_read,
   input  [`E203_XLEN-1:0]        ext2itcm_icb_cmd_wdata,
   input  [`E203_XLEN/8-1:0]      ext2itcm_icb_cmd_wmask,
   //
@@ -129,8 +129,8 @@ module e203_cpu_top(
   //    * Bus cmd channel
   input                          ext2dtcm_icb_cmd_valid,
   output                         ext2dtcm_icb_cmd_ready,
-  input  [`E203_DTCM_ADDR_WIDTH-1:0]   ext2dtcm_icb_cmd_addr, 
-  input                          ext2dtcm_icb_cmd_read, 
+  input  [`E203_DTCM_ADDR_WIDTH-1:0]   ext2dtcm_icb_cmd_addr,
+  input                          ext2dtcm_icb_cmd_read,
   input  [`E203_XLEN-1:0]        ext2dtcm_icb_cmd_wdata,
   input  [`E203_XLEN/8-1:0]      ext2dtcm_icb_cmd_wmask,
   //
@@ -142,15 +142,15 @@ module e203_cpu_top(
   // External interface (ICB) to access DTCM: End
   `endif//}
 
-  
+
   //////////////////////////////////////////////////////////////
   // The Private Peripheral Interface (ICB): Begin
   //
   //    * Bus cmd channel
   output                         ppi_icb_cmd_valid,
   input                          ppi_icb_cmd_ready,
-  output [`E203_ADDR_SIZE-1:0]   ppi_icb_cmd_addr, 
-  output                         ppi_icb_cmd_read, 
+  output [`E203_ADDR_SIZE-1:0]   ppi_icb_cmd_addr,
+  output                         ppi_icb_cmd_read,
   output [`E203_XLEN-1:0]        ppi_icb_cmd_wdata,
   output [`E203_XLEN/8-1:0]      ppi_icb_cmd_wmask,
   //
@@ -165,8 +165,8 @@ module e203_cpu_top(
   // The CLINT Interface (ICB): Begin
   output                         clint_icb_cmd_valid,
   input                          clint_icb_cmd_ready,
-  output [`E203_ADDR_SIZE-1:0]   clint_icb_cmd_addr, 
-  output                         clint_icb_cmd_read, 
+  output [`E203_ADDR_SIZE-1:0]   clint_icb_cmd_addr,
+  output                         clint_icb_cmd_read,
   output [`E203_XLEN-1:0]        clint_icb_cmd_wdata,
   output [`E203_XLEN/8-1:0]      clint_icb_cmd_wmask,
   //
@@ -181,8 +181,8 @@ module e203_cpu_top(
   // The PLIC Interface (ICB): Begin
   output                         plic_icb_cmd_valid,
   input                          plic_icb_cmd_ready,
-  output [`E203_ADDR_SIZE-1:0]   plic_icb_cmd_addr, 
-  output                         plic_icb_cmd_read, 
+  output [`E203_ADDR_SIZE-1:0]   plic_icb_cmd_addr,
+  output                         plic_icb_cmd_read,
   output [`E203_XLEN-1:0]        plic_icb_cmd_wdata,
   output [`E203_XLEN/8-1:0]      plic_icb_cmd_wmask,
   //
@@ -200,8 +200,8 @@ module e203_cpu_top(
   //    * Bus cmd channel
   output                         fio_icb_cmd_valid,
   input                          fio_icb_cmd_ready,
-  output [`E203_ADDR_SIZE-1:0]   fio_icb_cmd_addr, 
-  output                         fio_icb_cmd_read, 
+  output [`E203_ADDR_SIZE-1:0]   fio_icb_cmd_addr,
+  output                         fio_icb_cmd_read,
   output [`E203_XLEN-1:0]        fio_icb_cmd_wdata,
   output [`E203_XLEN/8-1:0]      fio_icb_cmd_wmask,
   //
@@ -218,8 +218,8 @@ module e203_cpu_top(
   //    * Bus cmd channel
   output                         mem_icb_cmd_valid,
   input                          mem_icb_cmd_ready,
-  output [`E203_ADDR_SIZE-1:0]   mem_icb_cmd_addr, 
-  output                         mem_icb_cmd_read, 
+  output [`E203_ADDR_SIZE-1:0]   mem_icb_cmd_addr,
+  output                         mem_icb_cmd_read,
   output [`E203_XLEN-1:0]        mem_icb_cmd_wdata,
   output [`E203_XLEN/8-1:0]      mem_icb_cmd_wmask,
   //
@@ -257,7 +257,7 @@ module e203_cpu_top(
   wire                          clk_itcm_ram ;
   `endif//}
 
-  
+
   `ifdef E203_HAS_DTCM //{
   wire  dtcm_ls;
 
@@ -350,10 +350,10 @@ module e203_cpu_top(
     `endif
 
   e203_cpu #(.MASTER(1)) u_e203_cpu(
-    .inspect_pc               (inspect_pc), 
+    .inspect_pc               (inspect_pc),
     .inspect_dbg_irq          (inspect_dbg_irq      ),
-    .inspect_mem_cmd_valid    (inspect_mem_cmd_valid), 
-    .inspect_mem_cmd_ready    (inspect_mem_cmd_ready), 
+    .inspect_mem_cmd_valid    (inspect_mem_cmd_valid),
+    .inspect_mem_cmd_ready    (inspect_mem_cmd_ready),
     .inspect_mem_rsp_valid    (inspect_mem_rsp_valid),
     .inspect_mem_rsp_ready    (inspect_mem_rsp_ready),
     .inspect_core_clk         (inspect_core_clk     ),
@@ -383,9 +383,9 @@ module e203_cpu_top(
     .wr_dscratch_ena (wr_dscratch_ena),
 
 
-                                     
+
     .wr_csr_nxt      (wr_csr_nxt    ),
-                                     
+
     .dcsr_r          (dcsr_r         ),
     .dpc_r           (dpc_r          ),
     .dscratch_r      (dscratch_r     ),
@@ -396,7 +396,7 @@ module e203_cpu_top(
     .dbg_ebreakm_r   (dbg_ebreakm_r),
     .dbg_stopcycle   (dbg_stopcycle),
 
-    .core_mhartid    (core_mhartid),  
+    .core_mhartid    (core_mhartid),
     .dbg_irq_a       (dbg_irq_a),
     .ext_irq_a       (ext_irq_a),
     .sft_irq_a       (sft_irq_a),
@@ -409,7 +409,7 @@ module e203_cpu_top(
     .ext2itcm_icb_cmd_read   (ext2itcm_icb_cmd_read ),
     .ext2itcm_icb_cmd_wdata  (ext2itcm_icb_cmd_wdata),
     .ext2itcm_icb_cmd_wmask  (ext2itcm_icb_cmd_wmask),
-    
+
     .ext2itcm_icb_rsp_valid  (ext2itcm_icb_rsp_valid),
     .ext2itcm_icb_rsp_ready  (ext2itcm_icb_rsp_ready),
     .ext2itcm_icb_rsp_err    (ext2itcm_icb_rsp_err  ),
@@ -423,7 +423,7 @@ module e203_cpu_top(
     .ext2dtcm_icb_cmd_read   (ext2dtcm_icb_cmd_read ),
     .ext2dtcm_icb_cmd_wdata  (ext2dtcm_icb_cmd_wdata),
     .ext2dtcm_icb_cmd_wmask  (ext2dtcm_icb_cmd_wmask),
-    
+
     .ext2dtcm_icb_rsp_valid  (ext2dtcm_icb_rsp_valid),
     .ext2dtcm_icb_rsp_ready  (ext2dtcm_icb_rsp_ready),
     .ext2dtcm_icb_rsp_err    (ext2dtcm_icb_rsp_err  ),
@@ -442,7 +442,7 @@ module e203_cpu_top(
     .ppi_icb_cmd_lock      (),
     .ppi_icb_cmd_excl      (),
     .ppi_icb_cmd_size      (),
-    
+
     .ppi_icb_rsp_valid     (ppi_icb_rsp_valid),
     .ppi_icb_rsp_ready     (ppi_icb_rsp_ready),
     .ppi_icb_rsp_err       (ppi_icb_rsp_err  ),
@@ -460,7 +460,7 @@ module e203_cpu_top(
     .clint_icb_cmd_lock      (),
     .clint_icb_cmd_excl      (),
     .clint_icb_cmd_size      (),
-    
+
     .clint_icb_rsp_valid     (clint_icb_rsp_valid),
     .clint_icb_rsp_ready     (clint_icb_rsp_ready),
     .clint_icb_rsp_err       (clint_icb_rsp_err  ),
@@ -478,7 +478,7 @@ module e203_cpu_top(
     .plic_icb_cmd_lock      (),
     .plic_icb_cmd_excl      (),
     .plic_icb_cmd_size      (),
-    
+
     .plic_icb_rsp_valid     (plic_icb_rsp_valid),
     .plic_icb_rsp_ready     (plic_icb_rsp_ready),
     .plic_icb_rsp_err       (plic_icb_rsp_err  ),
@@ -498,7 +498,7 @@ module e203_cpu_top(
     .fio_icb_cmd_lock      (),
     .fio_icb_cmd_excl      (),
     .fio_icb_cmd_size      (),
-    
+
     .fio_icb_rsp_valid     (fio_icb_rsp_valid),
     .fio_icb_rsp_ready     (fio_icb_rsp_ready),
     .fio_icb_rsp_err       (fio_icb_rsp_err  ),
@@ -519,7 +519,7 @@ module e203_cpu_top(
     .mem_icb_cmd_size   (),
     .mem_icb_cmd_burst  (),
     .mem_icb_cmd_beat   (),
-    
+
     .mem_icb_rsp_valid  (mem_icb_rsp_valid),
     .mem_icb_rsp_ready  (mem_icb_rsp_ready),
     .mem_icb_rsp_err    (mem_icb_rsp_err  ),
@@ -530,30 +530,30 @@ module e203_cpu_top(
   `ifdef E203_HAS_ITCM //{
     .itcm_ram_cs   (itcm_ram_cs  ),
     .itcm_ram_we   (itcm_ram_we  ),
-    .itcm_ram_addr (itcm_ram_addr), 
+    .itcm_ram_addr (itcm_ram_addr),
     .itcm_ram_wem  (itcm_ram_wem ),
-    .itcm_ram_din  (itcm_ram_din ),         
+    .itcm_ram_din  (itcm_ram_din ),
     .itcm_ram_dout (itcm_ram_dout),
-    .clk_itcm_ram  (clk_itcm_ram ),  
+    .clk_itcm_ram  (clk_itcm_ram ),
     .rst_itcm(rst_itcm),
   `endif//}
 
   `ifdef E203_HAS_DTCM //{
     .dtcm_ram_cs   (dtcm_ram_cs  ),
     .dtcm_ram_we   (dtcm_ram_we  ),
-    .dtcm_ram_addr (dtcm_ram_addr), 
+    .dtcm_ram_addr (dtcm_ram_addr),
     .dtcm_ram_wem  (dtcm_ram_wem ),
-    .dtcm_ram_din  (dtcm_ram_din ),         
+    .dtcm_ram_din  (dtcm_ram_din ),
     .dtcm_ram_dout (dtcm_ram_dout),
-    .clk_dtcm_ram  (clk_dtcm_ram ),  
+    .clk_dtcm_ram  (clk_dtcm_ram ),
     .rst_dtcm(rst_dtcm),
   `endif//}
 
-    .test_mode     (test_mode), 
+    .test_mode     (test_mode),
   `ifndef E203_HAS_LOCKSTEP//{
   `endif//}
     .rst_n         (rst_n),
-    .clk           (clk  ) 
+    .clk           (clk  )
 
   );
 
@@ -565,11 +565,11 @@ module e203_cpu_top(
 
    .dtcm_ram_cs   (dtcm_ram_cs  ),
    .dtcm_ram_we   (dtcm_ram_we  ),
-   .dtcm_ram_addr (dtcm_ram_addr), 
+   .dtcm_ram_addr (dtcm_ram_addr),
    .dtcm_ram_wem  (dtcm_ram_wem ),
-   .dtcm_ram_din  (dtcm_ram_din ),         
+   .dtcm_ram_din  (dtcm_ram_din ),
    .dtcm_ram_dout (dtcm_ram_dout),
-   .clk_dtcm_ram  (clk_dtcm_ram ),  
+   .clk_dtcm_ram  (clk_dtcm_ram ),
    .rst_dtcm(rst_dtcm),
   `endif//}
 
@@ -580,17 +580,17 @@ module e203_cpu_top(
 
    .itcm_ram_cs   (itcm_ram_cs  ),
    .itcm_ram_we   (itcm_ram_we  ),
-   .itcm_ram_addr (itcm_ram_addr), 
+   .itcm_ram_addr (itcm_ram_addr),
    .itcm_ram_wem  (itcm_ram_wem ),
-   .itcm_ram_din  (itcm_ram_din ),         
+   .itcm_ram_din  (itcm_ram_din ),
    .itcm_ram_dout (itcm_ram_dout),
-   .clk_itcm_ram  (clk_itcm_ram ),  
+   .clk_itcm_ram  (clk_itcm_ram ),
    .rst_itcm(rst_itcm),
   `endif//}
-   .test_mode (test_mode) 
+   .test_mode (test_mode)
   );
 
-  
+
 
 
 endmodule

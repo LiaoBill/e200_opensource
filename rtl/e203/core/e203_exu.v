@@ -1,21 +1,21 @@
- /*                                                                      
- Copyright 2017 Silicon Integrated Microelectronics, Inc.                
-                                                                         
- Licensed under the Apache License, Version 2.0 (the "License");         
- you may not use this file except in compliance with the License.        
- You may obtain a copy of the License at                                 
-                                                                         
-     http://www.apache.org/licenses/LICENSE-2.0                          
-                                                                         
-  Unless required by applicable law or agreed to in writing, software    
- distributed under the License is distributed on an "AS IS" BASIS,       
+ /*
+ Copyright 2017 Silicon Integrated Microelectronics, Inc.
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- See the License for the specific language governing permissions and     
- limitations under the License.                                          
- */                                                                      
-                                                                         
-                                                                         
-                                                                         
+ See the License for the specific language governing permissions and
+ limitations under the License.
+ */
+
+
+
 //=====================================================================
 //--        _______   ___
 //--       (   ____/ /__/
@@ -89,8 +89,8 @@ module e203_exu(
   input  i_pc_vld,
   input  i_misalgn,              // The fetch misalign
   input  i_buserr,               // The fetch bus error
-  input  i_prdt_taken,               
-  input  i_muldiv_b2b,               
+  input  i_prdt_taken,
+  input  i_muldiv_b2b,
   input  [`E203_RFIDX_WIDTH-1:0] i_rs1idx,   // The RS1 index
   input  [`E203_RFIDX_WIDTH-1:0] i_rs2idx,   // The RS2 index
 
@@ -99,17 +99,17 @@ module e203_exu(
   //////////////////////////////////////////////////////////////
   // The Flush interface to IFU
   //
-  //   To save the gatecount, when we need to flush pipeline with new PC, 
+  //   To save the gatecount, when we need to flush pipeline with new PC,
   //     we want to reuse the adder in IFU, so we will not pass flush-PC
   //     to IFU, instead, we pass the flush-pc-adder-op1/op2 to IFU
   //     and IFU will just use its adder to caculate the flush-pc-adder-result
   //
   input   pipe_flush_ack,
   output  pipe_flush_req,
-  output  [`E203_PC_SIZE-1:0] pipe_flush_add_op1,  
-  output  [`E203_PC_SIZE-1:0] pipe_flush_add_op2,  
+  output  [`E203_PC_SIZE-1:0] pipe_flush_add_op1,
+  output  [`E203_PC_SIZE-1:0] pipe_flush_add_op2,
   `ifdef E203_TIMING_BOOST//}
-  output  [`E203_PC_SIZE-1:0] pipe_flush_pc,  
+  output  [`E203_PC_SIZE-1:0] pipe_flush_pc,
   `endif//}
 
   //////////////////////////////////////////////////////////////
@@ -119,7 +119,7 @@ module e203_exu(
   output lsu_o_ready, // Handshake ready
   input  [`E203_XLEN-1:0] lsu_o_wbck_wdat,
   input  [`E203_ITAG_WIDTH -1:0] lsu_o_wbck_itag,
-  input  lsu_o_wbck_err , 
+  input  lsu_o_wbck_err ,
   input  lsu_o_cmt_ld,
   input  lsu_o_cmt_st,
   input  [`E203_ADDR_SIZE -1:0] lsu_o_cmt_badaddr,
@@ -146,10 +146,10 @@ module e203_exu(
   //    * Bus cmd channel
   output                         agu_icb_cmd_valid, // Handshake valid
   input                          agu_icb_cmd_ready, // Handshake ready
-  output [`E203_ADDR_SIZE-1:0]   agu_icb_cmd_addr, // Bus transaction start addr 
+  output [`E203_ADDR_SIZE-1:0]   agu_icb_cmd_addr, // Bus transaction start addr
   output                         agu_icb_cmd_read,   // Read or write
-  output [`E203_XLEN-1:0]        agu_icb_cmd_wdata, 
-  output [`E203_XLEN/8-1:0]      agu_icb_cmd_wmask, 
+  output [`E203_XLEN-1:0]        agu_icb_cmd_wdata,
+  output [`E203_XLEN/8-1:0]      agu_icb_cmd_wmask,
   output                         agu_icb_cmd_lock,
   output                         agu_icb_cmd_excl,
   output [1:0]                   agu_icb_cmd_size,
@@ -158,13 +158,13 @@ module e203_exu(
            //     return the ICB response channel back to AGU
            //     this is only used by AMO or unaligned load/store 1st uop
            //     to return the response
-  output                         agu_icb_cmd_back2agu, 
+  output                         agu_icb_cmd_back2agu,
            //   Sign extension or not
   output                         agu_icb_cmd_usign,
   output [`E203_ITAG_WIDTH -1:0] agu_icb_cmd_itag,
 
   //    * Bus RSP channel
-  input                          agu_icb_rsp_valid, // Response valid 
+  input                          agu_icb_rsp_valid, // Response valid
   output                         agu_icb_rsp_ready, // Response ready
   input                          agu_icb_rsp_err  , // Response error
   input                          agu_icb_rsp_excl_ok,
@@ -204,23 +204,23 @@ module e203_exu(
     .read_src2_idx (i_rs2idx ),
     .read_src1_dat (rf_rs1),
     .read_src2_dat (rf_rs2),
-    
+
     .x1_r          (rf2ifu_x1),
-                    
+
     .wbck_dest_wen (rf_wbck_ena),
     .wbck_dest_idx (rf_wbck_rdidx),
     .wbck_dest_dat (rf_wbck_wdat),
-                                 
+
     .test_mode     (test_mode),
     .clk           (clk          ),
-    .rst_n         (rst_n        ) 
+    .rst_n         (rst_n        )
   );
 
   wire dec_rs1en;
   wire dec_rs2en;
 
 
-  
+
   //////////////////////////////////////////////////////////////
   // Instantiate the Decode
   wire [`E203_DECINFO_WIDTH-1:0]  dec_info;
@@ -244,9 +244,9 @@ module e203_exu(
     .i_pc         (i_pc    ),
     .i_misalgn    (i_misalgn),
     .i_buserr     (i_buserr ),
-    .i_prdt_taken (i_prdt_taken), 
-    .i_muldiv_b2b (i_muldiv_b2b), 
-      
+    .i_prdt_taken (i_prdt_taken),
+    .i_muldiv_b2b (i_muldiv_b2b),
+
     .dec_rv32  (),
     .dec_bjp   (),
     .dec_jal   (),
@@ -262,7 +262,7 @@ module e203_exu(
     .dec_divu    (dec2ifu_divu  ),
     .dec_remu    (dec2ifu_remu  ),
 
-    
+
 
 
     .dec_info  (dec_info ),
@@ -283,14 +283,14 @@ module e203_exu(
 
   //////////////////////////////////////////////////////////////
   // Instantiate the Dispatch
-  wire disp_alu_valid; 
-  wire disp_alu_ready; 
+  wire disp_alu_valid;
+  wire disp_alu_ready;
   wire disp_alu_longpipe;
   wire [`E203_ITAG_WIDTH-1:0] disp_alu_itag;
   wire [`E203_XLEN-1:0] disp_alu_rs1;
   wire [`E203_XLEN-1:0] disp_alu_rs2;
   wire [`E203_XLEN-1:0] disp_alu_imm;
-  wire [`E203_DECINFO_WIDTH-1:0]  disp_alu_info;  
+  wire [`E203_DECINFO_WIDTH-1:0]  disp_alu_info;
   wire [`E203_PC_SIZE-1:0] disp_alu_pc;
   wire [`E203_RFIDX_WIDTH-1:0] disp_alu_rdidx;
   wire disp_alu_rdwen;
@@ -336,7 +336,7 @@ module e203_exu(
 
     .disp_i_valid        (i_valid         ),
     .disp_i_ready        (i_ready         ),
-                                       
+
     .disp_i_rs1x0        (dec_rs1x0       ),
     .disp_i_rs2x0        (dec_rs2x0       ),
     .disp_i_rs1en        (dec_rs1en       ),
@@ -388,14 +388,14 @@ module e203_exu(
     .disp_oitf_rdfpu     (disp_oitf_rdfpu),
     .disp_oitf_pc        (disp_oitf_pc),
 
-  
+
     .oitfrd_match_disprs1(oitfrd_match_disprs1),
     .oitfrd_match_disprs2(oitfrd_match_disprs2),
     .oitfrd_match_disprs3(oitfrd_match_disprs3),
     .oitfrd_match_disprd (oitfrd_match_disprd ),
-    
+
     .clk                 (clk  ),
-    .rst_n               (rst_n) 
+    .rst_n               (rst_n)
   );
 
   //////////////////////////////////////////////////////////////
@@ -443,7 +443,7 @@ module e203_exu(
     .oitf_empty           (oitf_empty    ),
 
     .clk                  (clk           ),
-    .rst_n                (rst_n         ) 
+    .rst_n                (rst_n         )
   );
 
   //////////////////////////////////////////////////////////////
@@ -563,7 +563,7 @@ module e203_exu(
     .cmt_o_buserr        (alu_cmt_buserr),
     .cmt_o_badaddr       (alu_cmt_badaddr),
 
-    .wbck_o_valid        (alu_wbck_o_valid ), 
+    .wbck_o_valid        (alu_wbck_o_valid ),
     .wbck_o_ready        (alu_wbck_o_ready ),
     .wbck_o_wdat         (alu_wbck_o_wdat  ),
     .wbck_o_rdidx        (alu_wbck_o_rdidx ),
@@ -584,24 +584,24 @@ module e203_exu(
     .agu_icb_cmd_lock    (agu_icb_cmd_lock),
     .agu_icb_cmd_excl    (agu_icb_cmd_excl),
     .agu_icb_cmd_size    (agu_icb_cmd_size),
-   
+
     .agu_icb_cmd_back2agu(agu_icb_cmd_back2agu ),
     .agu_icb_cmd_usign   (agu_icb_cmd_usign),
     .agu_icb_cmd_itag    (agu_icb_cmd_itag),
-  
+
     .agu_icb_rsp_valid   (agu_icb_rsp_valid ),
     .agu_icb_rsp_ready   (agu_icb_rsp_ready ),
     .agu_icb_rsp_err     (agu_icb_rsp_err   ),
     .agu_icb_rsp_excl_ok (agu_icb_rsp_excl_ok),
     .agu_icb_rsp_rdata   (agu_icb_rsp_rdata),
 
-    
+
 
 
     .mdv_nob2b         (mdv_nob2b),
 
     .clk                 (clk          ),
-    .rst_n               (rst_n        ) 
+    .rst_n               (rst_n        )
   );
 
   //////////////////////////////////////////////////////////////
@@ -634,7 +634,7 @@ module e203_exu(
     .lsu_cmt_i_badaddr  (lsu_o_cmt_badaddr),
     .lsu_cmt_i_buserr   (lsu_o_cmt_buserr ),
 
-    .longp_wbck_o_valid   (longp_wbck_o_valid ), 
+    .longp_wbck_o_valid   (longp_wbck_o_valid ),
     .longp_wbck_o_ready   (longp_wbck_o_ready ),
     .longp_wbck_o_wdat    (longp_wbck_o_wdat  ),
     .longp_wbck_o_rdidx   (longp_wbck_o_rdidx ),
@@ -657,12 +657,12 @@ module e203_exu(
     .oitf_empty          (oitf_empty    ),
     .oitf_ret_ptr        (oitf_ret_ptr  ),
     .oitf_ret_ena        (oitf_ret_ena  ),
-    
+
 
 
 
     .clk                 (clk          ),
-    .rst_n               (rst_n        ) 
+    .rst_n               (rst_n        )
   );
 
 
@@ -670,12 +670,12 @@ module e203_exu(
   // Instantiate the Final Write-Back
   e203_exu_wbck u_e203_exu_wbck(
 
-    .alu_wbck_i_valid   (alu_wbck_o_valid ), 
+    .alu_wbck_i_valid   (alu_wbck_o_valid ),
     .alu_wbck_i_ready   (alu_wbck_o_ready ),
     .alu_wbck_i_wdat    (alu_wbck_o_wdat  ),
     .alu_wbck_i_rdidx   (alu_wbck_o_rdidx ),
-                         
-    .longp_wbck_i_valid (longp_wbck_o_valid ), 
+
+    .longp_wbck_i_valid (longp_wbck_o_valid ),
     .longp_wbck_i_ready (longp_wbck_o_ready ),
     .longp_wbck_i_wdat  (longp_wbck_o_wdat  ),
     .longp_wbck_i_rdidx (longp_wbck_o_rdidx ),
@@ -685,10 +685,10 @@ module e203_exu(
     .rf_wbck_o_ena      (rf_wbck_ena    ),
     .rf_wbck_o_wdat     (rf_wbck_wdat   ),
     .rf_wbck_o_rdidx    (rf_wbck_rdidx  ),
-       
+
 
     .clk                 (clk          ),
-    .rst_n               (rst_n        ) 
+    .rst_n               (rst_n        )
   );
 
   //////////////////////////////////////////////////////////////
@@ -794,7 +794,7 @@ module e203_exu(
     .h_mode                (h_mode),
     .m_mode                (m_mode),
 
-    .cmt_badaddr           (cmt_badaddr    ), 
+    .cmt_badaddr           (cmt_badaddr    ),
     .cmt_badaddr_ena       (cmt_badaddr_ena),
     .cmt_epc               (cmt_epc        ),
     .cmt_epc_ena           (cmt_epc_ena    ),
@@ -802,7 +802,7 @@ module e203_exu(
     .cmt_cause_ena         (cmt_cause_ena  ),
     .cmt_instret_ena       (cmt_instret_ena  ),
     .cmt_status_ena        (cmt_status_ena  ),
-                           
+
     .cmt_dpc               (cmt_dpc        ),
     .cmt_dpc_ena           (cmt_dpc_ena    ),
     .cmt_dcause            (cmt_dcause     ),
@@ -818,21 +818,21 @@ module e203_exu(
 
     .pipe_flush_ack          (pipe_flush_ack    ),
     .pipe_flush_req          (pipe_flush_req    ),
-    .pipe_flush_add_op1      (pipe_flush_add_op1),  
-    .pipe_flush_add_op2      (pipe_flush_add_op2),  
+    .pipe_flush_add_op1      (pipe_flush_add_op1),
+    .pipe_flush_add_op2      (pipe_flush_add_op2),
   `ifdef E203_TIMING_BOOST//}
-    .pipe_flush_pc           (pipe_flush_pc),  
+    .pipe_flush_pc           (pipe_flush_pc),
   `endif//}
 
     .clk                     (clk          ),
-    .rst_n                   (rst_n        ) 
+    .rst_n                   (rst_n        )
   );
 
-    
+
     // The Decode to IFU read-en used for the branch dependency check
     //   only need to check the integer regfile, so here we need to exclude
     //   the FPU condition out
-  assign dec2ifu_rden  = disp_oitf_rdwen & (~disp_oitf_rdfpu); 
+  assign dec2ifu_rden  = disp_oitf_rdwen & (~disp_oitf_rdfpu);
   assign dec2ifu_rs1en = disp_oitf_rs1en & (~disp_oitf_rs1fpu);
   assign dec2ifu_rdidx = dec_rdidx;
   assign rf2ifu_rs1    = rf_rs1;
@@ -855,8 +855,8 @@ module e203_exu(
     .csr_wr_en           (csr_wr_en),
     .read_csr_dat        (read_csr_dat),
     .wbck_csr_dat        (wbck_csr_dat),
-   
-    .cmt_badaddr           (cmt_badaddr    ), 
+
+    .cmt_badaddr           (cmt_badaddr    ),
     .cmt_badaddr_ena       (cmt_badaddr_ena),
     .cmt_epc               (cmt_epc        ),
     .cmt_epc_ena           (cmt_epc_ena    ),
@@ -874,13 +874,13 @@ module e203_exu(
     .wr_dpc_ena      (wr_dpc_ena     ),
     .wr_dscratch_ena (wr_dscratch_ena),
 
-                                     
+
     .wr_csr_nxt      (wr_csr_nxt    ),
-                                     
+
     .dcsr_r          (dcsr_r         ),
     .dpc_r           (dpc_r          ),
     .dscratch_r      (dscratch_r     ),
-                                    
+
     .dbg_mode       (dbg_mode       ),
     .dbg_stopcycle  (dbg_stopcycle),
 
@@ -902,13 +902,13 @@ module e203_exu(
 
     .clk_aon       (clk_aon      ),
     .clk           (clk          ),
-    .rst_n         (rst_n        ) 
+    .rst_n         (rst_n        )
   );
 
   assign exu_active = (~oitf_empty) | i_valid | excp_active;
 
 
-endmodule                                      
-                                               
-                                               
-                                               
+endmodule
+
+
+

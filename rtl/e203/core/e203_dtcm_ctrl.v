@@ -35,6 +35,7 @@
 
   `ifdef E203_HAS_DTCM //{
 
+// dtcm Data Tightly Covered Memory controller
 module e203_dtcm_ctrl(
   output dtcm_active,
   // The cgstop is coming from CSR (0xBFE mcgstop)'s filed 1

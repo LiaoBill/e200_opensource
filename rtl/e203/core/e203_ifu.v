@@ -1,21 +1,21 @@
- /*                                                                      
- Copyright 2017 Silicon Integrated Microelectronics, Inc.                
-                                                                         
- Licensed under the Apache License, Version 2.0 (the "License");         
- you may not use this file except in compliance with the License.        
- You may obtain a copy of the License at                                 
-                                                                         
-     http://www.apache.org/licenses/LICENSE-2.0                          
-                                                                         
-  Unless required by applicable law or agreed to in writing, software    
- distributed under the License is distributed on an "AS IS" BASIS,       
+ /*
+ Copyright 2017 Silicon Integrated Microelectronics, Inc.
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- See the License for the specific language governing permissions and     
- limitations under the License.                                          
- */                                                                      
-                                                                         
-                                                                         
-                                                                         
+ See the License for the specific language governing permissions and
+ limitations under the License.
+ */
+
+
+
 //=====================================================================
 //--        _______   ___
 //--       (   ____/ /__/
@@ -34,11 +34,15 @@
 `include "e203_defines.v"
 
 module e203_ifu(
+  // pc 查看
   output[`E203_PC_SIZE-1:0] inspect_pc,
+  // 
   output ifu_active,
+  // itcm 指令存储器
   input  itcm_nohold,
 
-  input  [`E203_PC_SIZE-1:0] pc_rtvec,  
+  // 重置pc的时候的外部输入数值
+  input  [`E203_PC_SIZE-1:0] pc_rtvec,
   `ifdef E203_HAS_ITCM //{
   input  ifu2itcm_holdup,
   //input  ifu2itcm_replay,
@@ -54,14 +58,14 @@ module e203_ifu(
   input  ifu2itcm_icb_cmd_ready, // Handshake ready
             // Note: The data on rdata or wdata channel must be naturally
             //       aligned, this is in line with the AXI definition
-  output [`E203_ITCM_ADDR_WIDTH-1:0]   ifu2itcm_icb_cmd_addr, // Bus transaction start addr 
+  output [`E203_ITCM_ADDR_WIDTH-1:0]   ifu2itcm_icb_cmd_addr, // Bus transaction start addr
 
   //    * Bus RSP channel
-  input  ifu2itcm_icb_rsp_valid, // Response valid 
+  input  ifu2itcm_icb_rsp_valid, // Response valid
   output ifu2itcm_icb_rsp_ready, // Response ready
   input  ifu2itcm_icb_rsp_err,   // Response error
             // Note: the RSP rdata is inline with AXI definition
-  input  [`E203_ITCM_DATA_WIDTH-1:0] ifu2itcm_icb_rsp_rdata, 
+  input  [`E203_ITCM_DATA_WIDTH-1:0] ifu2itcm_icb_rsp_rdata,
   `endif//}
 
   `ifdef E203_HAS_MEM_ITF //{
@@ -73,14 +77,14 @@ module e203_ifu(
   input  ifu2biu_icb_cmd_ready, // Handshake ready
             // Note: The data on rdata or wdata channel must be naturally
             //       aligned, this is in line with the AXI definition
-  output [`E203_ADDR_SIZE-1:0]   ifu2biu_icb_cmd_addr, // Bus transaction start addr 
+  output [`E203_ADDR_SIZE-1:0]   ifu2biu_icb_cmd_addr, // Bus transaction start addr
 
   //    * Bus RSP channel
-  input  ifu2biu_icb_rsp_valid, // Response valid 
+  input  ifu2biu_icb_rsp_valid, // Response valid
   output ifu2biu_icb_rsp_ready, // Response ready
   input  ifu2biu_icb_rsp_err,   // Response error
             // Note: the RSP rdata is inline with AXI definition
-  input  [`E203_SYSMEM_DATA_WIDTH-1:0] ifu2biu_icb_rsp_rdata, 
+  input  [`E203_SYSMEM_DATA_WIDTH-1:0] ifu2biu_icb_rsp_rdata,
 
   //input  ifu2biu_replay,
   `endif//}
@@ -91,26 +95,26 @@ module e203_ifu(
   output [`E203_INSTR_SIZE-1:0] ifu_o_ir,// The instruction register
   output [`E203_PC_SIZE-1:0] ifu_o_pc,   // The PC register along with
   output ifu_o_pc_vld,
-  output ifu_o_misalgn,                  // The fetch misalign 
+  output ifu_o_misalgn,                  // The fetch misalign
   output ifu_o_buserr,                   // The fetch bus error
   output [`E203_RFIDX_WIDTH-1:0] ifu_o_rs1idx,
   output [`E203_RFIDX_WIDTH-1:0] ifu_o_rs2idx,
   output ifu_o_prdt_taken,               // The Bxx is predicted as taken
-  output ifu_o_muldiv_b2b,               
+  output ifu_o_muldiv_b2b,
   output ifu_o_valid, // Handshake signals with EXU stage
   input  ifu_o_ready,
 
   output  pipe_flush_ack,
   input   pipe_flush_req,
-  input   [`E203_PC_SIZE-1:0] pipe_flush_add_op1,  
+  input   [`E203_PC_SIZE-1:0] pipe_flush_add_op1,
   input   [`E203_PC_SIZE-1:0] pipe_flush_add_op2,
   `ifdef E203_TIMING_BOOST//}
-  input   [`E203_PC_SIZE-1:0] pipe_flush_pc,  
+  input   [`E203_PC_SIZE-1:0] pipe_flush_pc,
   `endif//}
 
-      
+
   // The halt request come from other commit stage
-  //   If the ifu_halt_req is asserting, then IFU will stop fetching new 
+  //   If the ifu_halt_req is asserting, then IFU will stop fetching new
   //     instructions and after the oustanding transactions are completed,
   //     asserting the ifu_halt_ack as the response.
   //   The IFU will resume fetching only after the ifu_halt_req is deasserted
@@ -133,22 +137,22 @@ module e203_ifu(
   input  rst_n
   );
 
-  
-  wire ifu_req_valid; 
-  wire ifu_req_ready; 
-  wire [`E203_PC_SIZE-1:0]   ifu_req_pc; 
+
+  wire ifu_req_valid;
+  wire ifu_req_ready;
+  wire [`E203_PC_SIZE-1:0]   ifu_req_pc;
   wire ifu_req_seq;
   wire ifu_req_seq_rv32;
   wire [`E203_PC_SIZE-1:0] ifu_req_last_pc;
-  wire ifu_rsp_valid; 
-  wire ifu_rsp_ready; 
-  wire ifu_rsp_err;   
-  //wire ifu_rsp_replay;   
-  wire [`E203_INSTR_SIZE-1:0] ifu_rsp_instr; 
+  wire ifu_rsp_valid;
+  wire ifu_rsp_ready;
+  wire ifu_rsp_err;
+  //wire ifu_rsp_replay;
+  wire [`E203_INSTR_SIZE-1:0] ifu_rsp_instr;
 
   e203_ifu_ifetch u_e203_ifu_ifetch(
     .inspect_pc   (inspect_pc),
-    .pc_rtvec      (pc_rtvec),  
+    .pc_rtvec      (pc_rtvec),
     .ifu_req_valid (ifu_req_valid),
     .ifu_req_ready (ifu_req_ready),
     .ifu_req_pc    (ifu_req_pc   ),
@@ -171,13 +175,13 @@ module e203_ifu(
     .ifu_o_muldiv_b2b(ifu_o_muldiv_b2b),
     .ifu_o_valid   (ifu_o_valid  ),
     .ifu_o_ready   (ifu_o_ready  ),
-    .pipe_flush_ack     (pipe_flush_ack    ), 
+    .pipe_flush_ack     (pipe_flush_ack    ),
     .pipe_flush_req     (pipe_flush_req    ),
-    .pipe_flush_add_op1 (pipe_flush_add_op1),     
+    .pipe_flush_add_op1 (pipe_flush_add_op1),
   `ifdef E203_TIMING_BOOST//}
-    .pipe_flush_pc      (pipe_flush_pc),  
+    .pipe_flush_pc      (pipe_flush_pc),
   `endif//}
-    .pipe_flush_add_op2 (pipe_flush_add_op2), 
+    .pipe_flush_add_op2 (pipe_flush_add_op2),
     .ifu_halt_req  (ifu_halt_req ),
     .ifu_halt_ack  (ifu_halt_ack ),
 
@@ -194,7 +198,7 @@ module e203_ifu(
     .dec2ifu_remu  (dec2ifu_remu  ),
 
     .clk           (clk          ),
-    .rst_n         (rst_n        ) 
+    .rst_n         (rst_n        )
   );
 
 
@@ -242,10 +246,10 @@ module e203_ifu(
   `endif//}
 
     .clk           (clk          ),
-    .rst_n         (rst_n        ) 
+    .rst_n         (rst_n        )
   );
 
   assign ifu_active = 1'b1;// Seems the IFU never rest at block level
-  
+
 endmodule
 
