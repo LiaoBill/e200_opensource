@@ -280,7 +280,7 @@ module e203_core(
   input  clk_core_ifu,
   // ----adding code here-----
   // extract decode out of it
-  input  clk_core_dec,// here adding one decode clock
+  // input  clk_core_dec,// here adding one decode clock
   // ----adding code here-----
   input  clk_core_exu,
   // ----adding code here-----
