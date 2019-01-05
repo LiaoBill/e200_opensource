@@ -145,6 +145,7 @@ module e203_ifu_litebpu(
   //bpu需要等待，因为jalr需要读的寄存器和其他指令产生RAW依赖，或者是
   assign bpu_wait = jalr_rs1x1_dep | jalr_rs1xn_dep | rs1xn_rdrf_set;
 
+  //不论什么情况下都先计算出两个立即数，然后各种情况的两个立即数相加得到预测的pc, 这样是为了减少加法器的数量从而减少芯片面积
   // The jump and link (JAL) instruction uses the J-type format, where the J-immediate encodes a
   // signed offset in multiples of 2 bytes. The offset is sign-extended and added to the pc to form the
   // jump target address. 
