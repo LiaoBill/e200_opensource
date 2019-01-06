@@ -80,7 +80,8 @@ module e203_exu_aluwbck(
   // wire wbck_ready4lsu = (lsu_wbck_i_itag == oitf_ret_ptr) & (~oitf_empty);
   // wire wbck_sel_lsu = lsu_wbck_i_valid & wbck_ready4lsu;
   // --------- add/modify/delete code ---------模仿上方的写法即可
-  wire wbck_ready4alu = (x_alu_wbck_i_itag == oitf_ret_ptr) & (~oitf_empty);
+  // 为了测试先设置为永真
+  wire wbck_ready4alu = 1'b1 | (x_alu_wbck_i_itag == oitf_ret_ptr) & (~oitf_empty);
   wire wbck_sel_alu = x_alu_wbck_i_valid & wbck_ready4alu;
 
   // 异常处理不需要
@@ -175,7 +176,9 @@ module e203_exu_aluwbck(
 
   // assign longp_excp_o_pc    = wbck_i_pc;
 
-  assign oitf_ret_ena = wbck_i_valid & wbck_i_ready;
+  // 为了测试牺牲一下
+  // assign oitf_ret_ena = wbck_i_valid & wbck_i_ready;
+  assign oitf_ret_ena = 1'b1 | wbck_i_valid & wbck_i_ready;
 
 endmodule                                      
                                                

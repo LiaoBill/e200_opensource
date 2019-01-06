@@ -701,9 +701,9 @@ module e203_exu(
   // --------- add/modify/delete code ---------
   wire x_alu_wbck_o_valid;
   wire x_alu_wbck_o_ready;
-  wire x_alu_wbck_o_wdat;
-  wire x_alu_wbck_o_rdidx;
-  wire x_alu_wbck_o_itag;
+  wire [`E203_XLEN-1:0] x_alu_wbck_o_wdat;
+  wire [`E203_RFIDX_WIDTH-1:0] x_alu_wbck_o_rdidx;
+  wire [`E203_ITAG_WIDTH -1:0] x_alu_wbck_o_itag;
   //////////////////////////////////////////////////////////////
   // Instantiate the Final Write-Back
   // --------- add/modify/delete code ---------
