@@ -61,7 +61,7 @@ module e203_exu_alu(
   output amo_wait,
   input  oitf_empty,
 
-
+  // 当前oitf中这个alu的itag
   input  [`E203_ITAG_WIDTH-1:0] i_itag,
   input  [`E203_XLEN-1:0] i_rs1,
   input  [`E203_XLEN-1:0] i_rs2,
@@ -116,6 +116,8 @@ module e203_exu_alu(
   input  wbck_o_ready, // Handshake ready
   output [`E203_XLEN-1:0] wbck_o_wdat,
   output [`E203_RFIDX_WIDTH-1:0] wbck_o_rdidx,
+  // --------- add/modify/delete code ---------
+  output [`E203_ITAG_WIDTH-1:0] wbck_o_itag,
 
   input  mdv_nob2b,
 
@@ -161,6 +163,11 @@ module e203_exu_alu(
   );
 
 
+  // --------- add/modify/delete code ---------
+  // ALU part, give itag to later one
+  wire  [`E203_ITAG_WIDTH-1:0]     alu_i_itag = {`E203_ITAG_WIDTH   {alu_op}} & i_itag;
+  assign wbck_o_itag = alu_i_itag;
+  // --------- add/modify/delete code ---------
 
   //////////////////////////////////////////////////////////////
   // Dispatch to different sub-modules according to their types
@@ -408,6 +415,7 @@ module e203_exu_alu(
   wire  [`E203_XLEN-1:0]           agu_i_rs2  = {`E203_XLEN         {agu_op}} & i_rs2;
   wire  [`E203_XLEN-1:0]           agu_i_imm  = {`E203_XLEN         {agu_op}} & i_imm;
   wire  [`E203_DECINFO_WIDTH-1:0]  agu_i_info = {`E203_DECINFO_WIDTH{agu_op}} & i_info;
+  // 如果是agu指令，那么agu_i_itag就是OITF传递过来的队列尾部的ITAG，不然就是全0
   wire  [`E203_ITAG_WIDTH-1:0]     agu_i_itag = {`E203_ITAG_WIDTH   {agu_op}} & i_itag;
 
 
@@ -556,6 +564,7 @@ module e203_exu_alu(
   wire [`E203_XLEN-1:0]           mdv_i_rs2  = {`E203_XLEN         {mdv_op}} & i_rs2;
   wire [`E203_XLEN-1:0]           mdv_i_imm  = {`E203_XLEN         {mdv_op}} & i_imm;
   wire [`E203_DECINFO_WIDTH-1:0]  mdv_i_info = {`E203_DECINFO_WIDTH{mdv_op}} & i_info;
+  // 如果是mdv指令，那么mdv_i_itag就是OITF传递过来的队列尾部的ITAG，不然就是全0
   wire  [`E203_ITAG_WIDTH-1:0]    mdv_i_itag = {`E203_ITAG_WIDTH   {mdv_op}} & i_itag;
 
   wire mdv_o_valid;

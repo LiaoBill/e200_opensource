@@ -39,6 +39,7 @@ module e203_exu_oitf (
   input  dis_ena,
   input  ret_ena,
 
+  // 输出的队尾 dis_ptr 和 输出的ret_ptr （ITAG） 标志
   output [`E203_ITAG_WIDTH-1:0] dis_ptr,
   output [`E203_ITAG_WIDTH-1:0] ret_ptr,
 

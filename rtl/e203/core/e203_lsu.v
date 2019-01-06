@@ -208,6 +208,7 @@ module e203_lsu(
     .lsu_o_valid           (lsu_o_valid ),
     .lsu_o_ready           (lsu_o_ready ),
     .lsu_o_wbck_wdat       (lsu_o_wbck_wdat),
+    //直接由lsu 控制单元给出当前指令的ITAG
     .lsu_o_wbck_itag       (lsu_o_wbck_itag),
     .lsu_o_wbck_err        (lsu_o_wbck_err  ),
     .lsu_o_cmt_buserr      (lsu_o_cmt_buserr  ),

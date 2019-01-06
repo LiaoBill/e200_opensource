@@ -79,6 +79,7 @@ module e203_exu_disp(
   output [`E203_DECINFO_WIDTH-1:0]  disp_o_alu_info,  
   output [`E203_XLEN-1:0] disp_o_alu_imm,
   output [`E203_PC_SIZE-1:0] disp_o_alu_pc,
+  // 直接将由OITF传递过来的队列尾部ITAG传递出去
   output [`E203_ITAG_WIDTH-1:0] disp_o_alu_itag,
   output disp_o_alu_misalgn,
   output disp_o_alu_buserr ,
@@ -90,6 +91,7 @@ module e203_exu_disp(
   input  oitfrd_match_disprs2,
   input  oitfrd_match_disprs3,
   input  oitfrd_match_disprd,
+  // 由OITF传递过来的队列尾部ITAG
   input  [`E203_ITAG_WIDTH-1:0] disp_oitf_ptr ,
 
   // 也就是和alu握手完成并且通过alu计算确定是长指令了（现在只有乘除法和LS操作），才会ena
@@ -259,6 +261,7 @@ module e203_exu_disp(
 
   assign disp_o_alu_imm  = disp_i_imm;
   assign disp_o_alu_pc   = disp_i_pc;
+  // 记录由OITF传递过来的队列尾部ITAG
   assign disp_o_alu_itag = disp_oitf_ptr;
   assign disp_o_alu_misalgn= disp_i_misalgn;
   assign disp_o_alu_buserr = disp_i_buserr ;

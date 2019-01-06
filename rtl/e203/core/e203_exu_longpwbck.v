@@ -86,6 +86,9 @@ module e203_exu_longpwbck(
 
   // The Long-pipe instruction can write-back only when it's itag 
   //   is same as the itag of toppest entry of OITF
+  // oitf不能是空的，不然没东西删除也没必要删除
+  // oitf_ret_ptr队首的物体和当前要写回的itag一样，那么我们才能进行写会
+  // 也就是说我们在ALU这里加一个判断就好了
   wire wbck_ready4lsu = (lsu_wbck_i_itag == oitf_ret_ptr) & (~oitf_empty);
   wire wbck_sel_lsu = lsu_wbck_i_valid & wbck_ready4lsu;
 

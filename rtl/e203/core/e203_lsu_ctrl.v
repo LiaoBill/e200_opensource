@@ -249,6 +249,7 @@ module e203_lsu_ctrl(
   wire                         pre_agu_icb_rsp_read;
   wire                         pre_agu_icb_rsp_excl;
   wire [2-1:0]                 pre_agu_icb_rsp_size;
+  // lsu控制单元用这个线表示了当前lsu指令的ITAG
   wire [`E203_ITAG_WIDTH -1:0] pre_agu_icb_rsp_itag;
   wire [`E203_ADDR_SIZE-1:0]   pre_agu_icb_rsp_addr;
 
@@ -434,7 +435,7 @@ module e203_lsu_ctrl(
                              pre_agu_icb_rsp_ready
                            , eai_icb_rsp_ready
                            };
-
+  // 通过ICB总线赋值,没必要继续看了，只要知道oitf提供了队首的ITAG就好了
   sirv_gnrl_icb_arbt # (
   .ARBT_SCHEME (0),// Priority based
   .ALLOW_0CYCL_RSP (0),// Dont allow the 0 cycle response because in BIU we always have CMD_DP larger than 0

@@ -539,6 +539,7 @@ module e203_core(
     .lsu_o_valid            (lsu_o_valid   ),
     .lsu_o_ready            (lsu_o_ready   ),
     .lsu_o_wbck_wdat        (lsu_o_wbck_wdat    ),
+    //一个输入，表示当前要lsu写会的指令的itag
     .lsu_o_wbck_itag        (lsu_o_wbck_itag    ),
     .lsu_o_wbck_err         (lsu_o_wbck_err     ),
     .lsu_o_cmt_buserr       (lsu_o_cmt_buserr     ),
@@ -606,6 +607,7 @@ module e203_core(
     .lsu_o_valid         (lsu_o_valid   ),
     .lsu_o_ready         (lsu_o_ready   ),
     .lsu_o_wbck_wdat     (lsu_o_wbck_wdat    ),
+    //lsu单元的一个输出，代表当前要写回的lsu指令的ITAG
     .lsu_o_wbck_itag     (lsu_o_wbck_itag    ),
     .lsu_o_wbck_err      (lsu_o_wbck_err     ),
     .lsu_o_cmt_buserr    (lsu_o_cmt_buserr     ),

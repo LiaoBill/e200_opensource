@@ -118,6 +118,7 @@ module e203_exu(
   input  lsu_o_valid, // Handshake valid
   output lsu_o_ready, // Handshake ready
   input  [`E203_XLEN-1:0] lsu_o_wbck_wdat,
+  // 一个input，代表当前要写回的lsu指令的itag
   input  [`E203_ITAG_WIDTH -1:0] lsu_o_wbck_itag,
   input  lsu_o_wbck_err ,
   input  lsu_o_cmt_ld,
@@ -359,6 +360,7 @@ module e203_exu(
     .disp_o_alu_valid    (disp_alu_valid   ),
     .disp_o_alu_ready    (disp_alu_ready   ),
     .disp_o_alu_longpipe (disp_alu_longpipe),
+    // // 直接将由OITF传递过来的队列尾部ITAG传递出去
     .disp_o_alu_itag     (disp_alu_itag    ),
     .disp_o_alu_rs1      (disp_alu_rs1     ),
     .disp_o_alu_rs2      (disp_alu_rs2     ),
@@ -416,9 +418,10 @@ module e203_exu(
     .dis_ena              (disp_oitf_ena  ),
     .ret_ena              (oitf_ret_ena  ),
 
+    // oitf // 输出的队尾 dis_ptr 和 输出的ret_ptr （ITAG） 标志
     .dis_ptr              (disp_oitf_ptr  ),
-
     .ret_ptr              (oitf_ret_ptr  ),
+
     .ret_rdidx            (oitf_ret_rdidx),
     .ret_rdwen            (oitf_ret_rdwen),
     .ret_rdfpu            (oitf_ret_rdfpu),
@@ -544,6 +547,7 @@ module e203_exu(
     .i_valid             (disp_alu_valid   ),
     .i_ready             (disp_alu_ready   ),
     .i_longpipe          (disp_alu_longpipe),
+    // 直接将由OITF传递过来的队列尾部ITAG传递（oitf->dispatch->exu_alu）
     .i_itag              (disp_alu_itag    ),
     .i_rs1               (disp_alu_rs1     ),
     .i_rs2               (disp_alu_rs2     ),
@@ -594,6 +598,7 @@ module e203_exu(
     .wbck_o_ready        (alu_wbck_o_ready ),
     .wbck_o_wdat         (alu_wbck_o_wdat  ),
     .wbck_o_rdidx        (alu_wbck_o_rdidx ),
+    .wbck_o_itag        (x_alu_wbck_o_itag),
 
     .csr_ena             (csr_ena),
     .csr_idx             (csr_idx),
@@ -654,6 +659,7 @@ module e203_exu(
     .lsu_wbck_i_valid   (lsu_o_valid ),
     .lsu_wbck_i_ready   (lsu_o_ready ),
     .lsu_wbck_i_wdat    (lsu_o_wbck_wdat  ),
+    //一个input表示当前要写会的东西的ITAG
     .lsu_wbck_i_itag    (lsu_o_wbck_itag  ),
     .lsu_wbck_i_err     (lsu_o_wbck_err   ),
     .lsu_cmt_i_ld       (lsu_o_cmt_ld     ),
@@ -692,15 +698,49 @@ module e203_exu(
     .rst_n               (rst_n        )
   );
 
-
+  // --------- add/modify/delete code ---------
+  wire x_alu_wbck_o_valid;
+  wire x_alu_wbck_o_ready;
+  wire x_alu_wbck_o_wdat;
+  wire x_alu_wbck_o_rdidx;
+  wire x_alu_wbck_o_itag;
   //////////////////////////////////////////////////////////////
   // Instantiate the Final Write-Back
+  // --------- add/modify/delete code ---------
+  e203_exu_aluwbck u_e203_exu_aluwbck(
+
+    .x_alu_wbck_i_valid   (alu_wbck_o_valid ),
+    .x_alu_wbck_i_ready   (alu_wbck_o_ready ),
+    .x_alu_wbck_i_wdat    (alu_wbck_o_wdat  ),
+    .x_alu_wbck_i_rdidx   (alu_wbck_o_rdidx ),
+    .x_alu_wbck_i_itag    (x_alu_wbck_o_itag),
+
+    .alu_wbck_o_valid (x_alu_wbck_o_valid ),
+    .alu_wbck_o_ready (x_alu_wbck_o_ready ),
+    .alu_wbck_o_wdat  (x_alu_wbck_o_wdat  ),
+    .alu_wbck_o_rdidx (x_alu_wbck_o_rdidx ),
+    // .alu_wbck_o_itag  (x_alu_wbck_o_itag),
+
+    .oitf_empty          (oitf_empty    ),
+    .oitf_ret_ptr        (oitf_ret_ptr  ),
+    .oitf_ret_rdidx      (oitf_ret_rdidx),
+    .oitf_ret_pc         (oitf_ret_pc   ),
+
+    .oitf_ret_rdwen      (oitf_ret_rdwen),
+    // 是否oitf淦出来一个值
+    .oitf_ret_ena        (oitf_ret_ena  ),
+
+    .clk                 (clk          ),
+    .rst_n               (rst_n        )
+  );
+  // --------- add/modify/delete code ---------
+
   e203_exu_wbck u_e203_exu_wbck(
 
-    .alu_wbck_i_valid   (alu_wbck_o_valid ),
-    .alu_wbck_i_ready   (alu_wbck_o_ready ),
-    .alu_wbck_i_wdat    (alu_wbck_o_wdat  ),
-    .alu_wbck_i_rdidx   (alu_wbck_o_rdidx ),
+    .alu_wbck_i_valid   (x_alu_wbck_o_valid ),
+    .alu_wbck_i_ready   (x_alu_wbck_o_ready ),
+    .alu_wbck_i_wdat    (x_alu_wbck_o_wdat  ),
+    .alu_wbck_i_rdidx   (x_alu_wbck_o_rdidx ),
 
     .longp_wbck_i_valid (longp_wbck_o_valid ),
     .longp_wbck_i_ready (longp_wbck_o_ready ),
