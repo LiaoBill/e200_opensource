@@ -76,6 +76,21 @@ module e203_exu_wbck(
   );
 
 
+  // --------- add/modify/delete code ---------
+  wire reg_alu_wbck_i_ready;
+  wire reg_longp_wbck_i_ready;
+  wire reg_rf_wbck_o_ena;
+  wire [`E203_XLEN-1:0] reg_rf_wbck_o_wdat; 
+  wire [`E203_RFIDX_WIDTH-1:0] reg_rf_wbck_o_rdidx;
+
+  sirv_gnrl_dffl #(1) x_reg_alu_wbck_i_ready (1'b1, reg_alu_wbck_i_ready, alu_wbck_i_ready, clk);
+  sirv_gnrl_dffl #(1) x_reg_longp_wbck_i_ready (1'b1, reg_longp_wbck_i_ready, longp_wbck_i_ready, clk);
+  sirv_gnrl_dffl #(1) x_reg_rf_wbck_o_ena (1'b1, reg_rf_wbck_o_ena, rf_wbck_o_ena, clk);
+  sirv_gnrl_dffl #(`E203_XLEN) x_reg_rf_wbck_o_wdat (1'b1, reg_rf_wbck_o_wdat, rf_wbck_o_wdat, clk);
+  sirv_gnrl_dffl #(`E203_RFIDX_WIDTH) x_reg_rf_wbck_o_rdidx (1'b1, reg_rf_wbck_o_rdidx, rf_wbck_o_rdidx, clk);
+
+  // --------- add/modify/delete code ---------
+
   // The ALU instruction can write-back only when there is no any
   //  long pipeline instruction writing-back
   //    * Since ALU is the 1 cycle instructions, it have lowest
@@ -111,11 +126,19 @@ module e203_exu_wbck(
   // register data float point unit or something???? --------------------unkown
   wire wbck_i_rdfpu;
 
+  // --------- add/modify/delete code ---------
   // input alu is valid (which is a request)
   // and output is a ready flag, which used wbck_ready4alu for calculation
   // means if ready(no further long part to write), and current
-  assign alu_wbck_i_ready   = wbck_ready4alu   & wbck_i_ready;
-  assign longp_wbck_i_ready = wbck_ready4longp & wbck_i_ready;
+
+  // assign alu_wbck_i_ready   = wbck_ready4alu   & wbck_i_ready;
+  assign reg_alu_wbck_i_ready   = wbck_ready4alu   & wbck_i_ready;
+  // --------- add/modify/delete code ---------
+  
+  // --------- add/modify/delete code ---------
+  // assign longp_wbck_i_ready = wbck_ready4longp & wbck_i_ready;
+  assign reg_longp_wbck_i_ready = wbck_ready4longp & wbck_i_ready;
+  // --------- add/modify/delete code ---------
 
   
   assign wbck_i_valid = wbck_sel_alu ? alu_wbck_i_valid : longp_wbck_i_valid;
@@ -136,9 +159,17 @@ module e203_exu_wbck(
 
   wire wbck_o_ena   = rf_wbck_o_valid & rf_wbck_o_ready;
 
-  assign rf_wbck_o_ena   = wbck_o_ena & (~wbck_i_rdfpu);
-  assign rf_wbck_o_wdat  = wbck_i_wdat[`E203_XLEN-1:0];
-  assign rf_wbck_o_rdidx = wbck_i_rdidx;
+  // --------- add/modify/delete code ---------
+  // assign rf_wbck_o_ena   = wbck_o_ena & (~wbck_i_rdfpu);
+  assign reg_rf_wbck_o_ena   = wbck_o_ena & (~wbck_i_rdfpu);
+  // --------- add/modify/delete code ---------
+
+  // --------- add/modify/delete code ---------
+  // assign rf_wbck_o_wdat  = wbck_i_wdat[`E203_XLEN-1:0];
+  assign reg_rf_wbck_o_wdat  = wbck_i_wdat[`E203_XLEN-1:0];
+  // assign rf_wbck_o_rdidx = wbck_i_rdidx;
+  assign reg_rf_wbck_o_rdidx = wbck_i_rdidx;
+  // --------- add/modify/delete code ---------
 
 
 endmodule

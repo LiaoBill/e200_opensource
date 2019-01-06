@@ -63,7 +63,7 @@ all build: $(objdir)/$(obj)
 
 $(objdir)/$(obj): $(vsrc) $(csrc)
 	verilator $(vflags) $(vflags_extra) -o $(notdir $(obj)) $(csrc) $(vsrc)
-	make -C $(objdir) -f Vtb_verilator.mk
+	make -j8 -C $(objdir) -f Vtb_verilator.mk
 
 .PHONY: clean
 clean:
