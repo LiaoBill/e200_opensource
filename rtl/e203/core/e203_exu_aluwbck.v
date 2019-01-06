@@ -59,14 +59,16 @@ module e203_exu_aluwbck(
   // output [`E203_PC_SIZE -1:0] longp_excp_o_pc,
   //
   // --------- add/modify/delete code ---------
+  // --------- add/modify/delete code ---------
   //The itag of toppest entry of OITF
   input  oitf_empty,
   input  [`E203_ITAG_WIDTH -1:0] oitf_ret_ptr,
-  input  [`E203_RFIDX_WIDTH-1:0] oitf_ret_rdidx,
-  input  [`E203_PC_SIZE-1:0] oitf_ret_pc,
-  input  oitf_ret_rdwen,
-  // input  oitf_ret_rdfpu,
+  // input  [`E203_RFIDX_WIDTH-1:0] oitf_ret_rdidx,
+  // // input  [`E203_PC_SIZE-1:0] oitf_ret_pc,
+  // input  oitf_ret_rdwen,
+  // // input  oitf_ret_rdfpu,
   output oitf_ret_ena,
+  // --------- add/modify/delete code ---------
   
   input  clk,
   input  rst_n
@@ -81,6 +83,7 @@ module e203_exu_aluwbck(
   // wire wbck_sel_lsu = lsu_wbck_i_valid & wbck_ready4lsu;
   // --------- add/modify/delete code ---------模仿上方的写法即可
   // 为了测试先设置为永真
+  // wire wbck_ready4alu = (x_alu_wbck_i_itag == oitf_ret_ptr) & (~oitf_empty);
   wire wbck_ready4alu = 1'b1 | (x_alu_wbck_i_itag == oitf_ret_ptr) & (~oitf_empty);
   wire wbck_sel_alu = x_alu_wbck_i_valid & wbck_ready4alu;
 
@@ -114,7 +117,7 @@ module e203_exu_aluwbck(
   wire [`E203_XLEN-1:0] wbck_i_wdat;
   // wire [5-1:0] wbck_i_flags;
   wire [`E203_RFIDX_WIDTH-1:0] wbck_i_rdidx;
-  wire [`E203_PC_SIZE-1:0] wbck_i_pc;
+  // wire [`E203_PC_SIZE-1:0] wbck_i_pc;
   wire wbck_i_rdwen;
   // wire wbck_i_rdfpu;
   wire wbck_i_err ;
@@ -140,15 +143,17 @@ module e203_exu_aluwbck(
   // assign wbck_i_err   = wbck_sel_lsu & lsu_wbck_i_err 
   //                        ;
 
-  assign wbck_i_pc    = oitf_ret_pc;
-  assign wbck_i_rdidx = oitf_ret_rdidx;
-  assign wbck_i_rdwen = oitf_ret_rdwen;
+  // assign wbck_i_pc    = oitf_ret_pc;
+  assign wbck_i_rdidx = x_alu_wbck_i_rdidx;
+  // assign wbck_i_rdwen = oitf_ret_rdwen;
   // assign wbck_i_rdfpu = oitf_ret_rdfpu;
 
   // If the instruction have no error and it have the rdwen, then it need to 
   //   write back into regfile, otherwise, it does not need to write regfile
   // wire need_wbck = wbck_i_rdwen & (~wbck_i_err);
-  wire need_wbck = wbck_i_rdwen;
+  // --------- add/modify/delete code ---------
+  // wire need_wbck = wbck_i_rdwen;
+  // wire need_wbck = 1'b1 | wbck_i_rdwen;
 
   // If the long pipe instruction have error result, then it need to handshake
   //   with the commit module.
@@ -158,13 +163,13 @@ module e203_exu_aluwbck(
   //      (need_wbck ? longp_wbck_o_ready : 1'b1)
   //    & (need_excp ? longp_excp_o_ready : 1'b1);
   assign wbck_i_ready = 
-       (need_wbck ? alu_wbck_o_ready : 1'b1);
+       alu_wbck_o_ready;
      // & (need_excp ? longp_excp_o_ready : 1'b1); no  exception needed
 
   // --------- add/modify/delete code ---------
   // 不需要处理异常
   // assign longp_wbck_o_valid = need_wbck & wbck_i_valid & (need_excp ? longp_excp_o_ready : 1'b1);
-  assign alu_wbck_o_valid = need_wbck & wbck_i_valid & 1'b1;
+  assign alu_wbck_o_valid = wbck_i_valid;
   // --------- add/modify/delete code ---------
   // 不需要异常处理
   // assign longp_excp_o_valid = need_excp & wbck_i_valid & (need_wbck ? longp_wbck_o_ready : 1'b1);
@@ -176,9 +181,9 @@ module e203_exu_aluwbck(
 
   // assign longp_excp_o_pc    = wbck_i_pc;
 
-  // 为了测试牺牲一下
+  // 为了测试牺牲一下, 写回了才会ready，才去除oitf中的数值
   // assign oitf_ret_ena = wbck_i_valid & wbck_i_ready;
-  assign oitf_ret_ena = 1'b1 | wbck_i_valid & wbck_i_ready;
+  assign oitf_ret_ena = 1'b0 & wbck_i_valid & wbck_i_ready;
 
 endmodule                                      
                                                

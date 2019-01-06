@@ -698,14 +698,15 @@ module e203_exu(
     .rst_n               (rst_n        )
   );
 
+
+  //////////////////////////////////////////////////////////////
+  
   // --------- add/modify/delete code ---------
   wire x_alu_wbck_o_valid;
   wire x_alu_wbck_o_ready;
   wire [`E203_XLEN-1:0] x_alu_wbck_o_wdat;
   wire [`E203_RFIDX_WIDTH-1:0] x_alu_wbck_o_rdidx;
   wire [`E203_ITAG_WIDTH -1:0] x_alu_wbck_o_itag;
-  //////////////////////////////////////////////////////////////
-  // Instantiate the Final Write-Back
   // --------- add/modify/delete code ---------
   e203_exu_aluwbck u_e203_exu_aluwbck(
 
@@ -723,11 +724,11 @@ module e203_exu(
 
     .oitf_empty          (oitf_empty    ),
     .oitf_ret_ptr        (oitf_ret_ptr  ),
-    .oitf_ret_rdidx      (oitf_ret_rdidx),
-    .oitf_ret_pc         (oitf_ret_pc   ),
+    // .oitf_ret_rdidx      (oitf_ret_rdidx),
+    // .oitf_ret_pc         (oitf_ret_pc   ),
 
-    .oitf_ret_rdwen      (oitf_ret_rdwen),
-    // 是否oitf淦出来一个值
+    // .oitf_ret_rdwen      (oitf_ret_rdwen),
+    // // 是否oitf淦出来一个值
     .oitf_ret_ena        (oitf_ret_ena  ),
 
     .clk                 (clk          ),
@@ -735,6 +736,7 @@ module e203_exu(
   );
   // --------- add/modify/delete code ---------
 
+  // Instantiate the Final Write-Back
   e203_exu_wbck u_e203_exu_wbck(
 
     .alu_wbck_i_valid   (x_alu_wbck_o_valid ),
@@ -757,6 +759,7 @@ module e203_exu(
     .clk                 (clk          ),
     .rst_n               (rst_n        )
   );
+  // --------- add/modify/delete code ---------
 
   //////////////////////////////////////////////////////////////
   // Instantiate the Commit
