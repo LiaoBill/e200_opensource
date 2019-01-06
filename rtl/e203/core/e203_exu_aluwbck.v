@@ -157,11 +157,14 @@ module e203_exu_aluwbck(
   //      (need_wbck ? longp_wbck_o_ready : 1'b1)
   //    & (need_excp ? longp_excp_o_ready : 1'b1);
   assign wbck_i_ready = 
-       (need_wbck ? alu_wbck_o_ready : 1'b1)
+       (need_wbck ? alu_wbck_o_ready : 1'b1);
      // & (need_excp ? longp_excp_o_ready : 1'b1); no  exception needed
 
-
-  assign longp_wbck_o_valid = need_wbck & wbck_i_valid & (need_excp ? longp_excp_o_ready : 1'b1);
+  // --------- add/modify/delete code ---------
+  // 不需要处理异常
+  // assign longp_wbck_o_valid = need_wbck & wbck_i_valid & (need_excp ? longp_excp_o_ready : 1'b1);
+  assign alu_wbck_o_valid = need_wbck & wbck_i_valid & 1'b1;
+  // --------- add/modify/delete code ---------
   // 不需要异常处理
   // assign longp_excp_o_valid = need_excp & wbck_i_valid & (need_wbck ? longp_wbck_o_ready : 1'b1);
 
