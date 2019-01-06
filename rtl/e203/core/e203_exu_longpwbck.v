@@ -168,6 +168,7 @@ module e203_exu_longpwbck(
 
   assign longp_excp_o_pc    = wbck_i_pc;
 
+  // 是否删除OITF FIFO里面的第一条数据
   assign oitf_ret_ena = wbck_i_valid & wbck_i_ready;
 
 endmodule                                      

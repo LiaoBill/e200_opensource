@@ -56,6 +56,7 @@ module e203_exu_disp(
   input  [`E203_XLEN-1:0] disp_i_rs2,
   input  disp_i_rdwen,
   input  [`E203_RFIDX_WIDTH-1:0] disp_i_rdidx,
+  //decode模块传过来的dec_info
   input  [`E203_DECINFO_WIDTH-1:0]  disp_i_info,  
   input  [`E203_XLEN-1:0] disp_i_imm,
   input  [`E203_PC_SIZE-1:0] disp_i_pc,
