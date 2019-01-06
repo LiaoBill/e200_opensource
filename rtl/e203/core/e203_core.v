@@ -38,6 +38,7 @@ module e203_core(
   output[`E203_PC_SIZE-1:0] inspect_pc,
 
   `ifdef E203_HAS_CSR_EAI//{
+  //用于和协处理器通信的扩展
   output         eai_csr_valid,
   input          eai_csr_ready,
   output  [31:0] eai_csr_addr,
@@ -45,6 +46,7 @@ module e203_core(
   output  [31:0] eai_csr_wdata,
   input   [31:0] eai_csr_rdata,
   `endif//}
+  //WFI(Wait For Interrupt)
   output core_wfi,
   output tm_stop,
   output core_cgstop,
@@ -467,6 +469,7 @@ module e203_core(
   `endif//}
 
 
+    //是否触发了异常
     .excp_active            (excp_active),
     .commit_mret            (commit_mret),
     .commit_trap            (commit_trap),

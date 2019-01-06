@@ -71,10 +71,15 @@ module e203_exu_wbck(
   //  long pipeline instruction writing-back
   //    * Since ALU is the 1 cycle instructions, it have lowest 
   //      priority in arbitration
+  //如果长指令流水线和ALU同时想要写数据，长指令优先
   wire wbck_ready4alu = (~longp_wbck_i_valid);
+  //alu_wbck_i_valid为1意味着alu想要写数据
+  //当alu想写数据并且长指令模不想写数据的时候才选择alu
   wire wbck_sel_alu = alu_wbck_i_valid & wbck_ready4alu;
   // The Long-pipe instruction can always write-back since it have high priority 
+  //写回模块总是准备好写回长指令的数据
   wire wbck_ready4longp = 1'b1;
+  //longp_wbck_i_valid为1意味着长指令模块想要写数据
   wire wbck_sel_longp = longp_wbck_i_valid & wbck_ready4longp;
 
 
@@ -90,16 +95,21 @@ module e203_exu_wbck(
   wire [`E203_RFIDX_WIDTH-1:0] wbck_i_rdidx;
   wire wbck_i_rdfpu;
 
+  //返回给alu的状态信息
   assign alu_wbck_i_ready   = wbck_ready4alu   & wbck_i_ready;
   assign longp_wbck_i_ready = wbck_ready4longp & wbck_i_ready;
 
   assign wbck_i_valid = wbck_sel_alu ? alu_wbck_i_valid : longp_wbck_i_valid;
   `ifdef E203_FLEN_IS_32//{
+    //选择写回数据
   assign wbck_i_wdat  = wbck_sel_alu ? alu_wbck_i_wdat  : longp_wbck_i_wdat;
   `else//}{
+          //选择写回数据
   assign wbck_i_wdat  = wbck_sel_alu ? {{`E203_FLEN-`E203_XLEN{1'b0}},alu_wbck_i_wdat}  : longp_wbck_i_wdat;
   `endif//}
+  //写回标识，alu没有写回标识，长指令的写回标识是由长指令模块传入的
   assign wbck_i_flags = wbck_sel_alu ? 5'b0  : longp_wbck_i_flags;
+  //选择写回的寄存器编号
   assign wbck_i_rdidx = wbck_sel_alu ? alu_wbck_i_rdidx : longp_wbck_i_rdidx;
   assign wbck_i_rdfpu = wbck_sel_alu ? 1'b0 : longp_wbck_i_rdfpu;
 
@@ -111,8 +121,11 @@ module e203_exu_wbck(
 
   wire wbck_o_ena   = rf_wbck_o_valid & rf_wbck_o_ready;
 
+  //寄存器写使能信号
   assign rf_wbck_o_ena   = wbck_o_ena & (~wbck_i_rdfpu);
+  //写如寄存器的数据
   assign rf_wbck_o_wdat  = wbck_i_wdat[`E203_XLEN-1:0];
+  //要写的寄存器序号
   assign rf_wbck_o_rdidx = wbck_i_rdidx;
 
 
