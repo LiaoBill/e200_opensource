@@ -66,7 +66,7 @@ module e203_exu_disp(
 
   //////////////////////////////////////////////////////////////
   // Dispatch to ALU
-  output disp_o_alu_valid,
+  output disp_o_alu_valid, 
   input  disp_o_alu_ready,
 
   input  disp_o_alu_longpipe,
