@@ -1,21 +1,21 @@
- /*                                                                      
- Copyright 2017 Silicon Integrated Microelectronics, Inc.                
-                                                                         
- Licensed under the Apache License, Version 2.0 (the "License");         
- you may not use this file except in compliance with the License.        
- You may obtain a copy of the License at                                 
-                                                                         
-     http://www.apache.org/licenses/LICENSE-2.0                          
-                                                                         
-  Unless required by applicable law or agreed to in writing, software    
- distributed under the License is distributed on an "AS IS" BASIS,       
+ /*
+ Copyright 2017 Silicon Integrated Microelectronics, Inc.
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- See the License for the specific language governing permissions and     
- limitations under the License.                                          
- */                                                                      
-                                                                         
-                                                                         
-                                                                         
+ See the License for the specific language governing permissions and
+ limitations under the License.
+ */
+
+
+
 //=====================================================================
 //--        _______   ___
 //--       (   ____/ /__/
@@ -38,11 +38,11 @@ module e203_biu(
   output                         biu_active,
   //////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////
-  // The ICB Interface from LSU 
+  // The ICB Interface from LSU
   input                          lsu2biu_icb_cmd_valid,
   output                         lsu2biu_icb_cmd_ready,
-  input  [`E203_ADDR_SIZE-1:0]   lsu2biu_icb_cmd_addr, 
-  input                          lsu2biu_icb_cmd_read, 
+  input  [`E203_ADDR_SIZE-1:0]   lsu2biu_icb_cmd_addr,
+  input                          lsu2biu_icb_cmd_read,
   input  [`E203_XLEN-1:0]        lsu2biu_icb_cmd_wdata,
   input  [`E203_XLEN/8-1:0]      lsu2biu_icb_cmd_wmask,
   input  [1:0]                   lsu2biu_icb_cmd_burst,
@@ -50,7 +50,7 @@ module e203_biu(
   input                          lsu2biu_icb_cmd_lock,
   input                          lsu2biu_icb_cmd_excl,
   input  [1:0]                   lsu2biu_icb_cmd_size,
-  
+
   output                         lsu2biu_icb_rsp_valid,
   input                          lsu2biu_icb_rsp_ready,
   output                         lsu2biu_icb_rsp_err  ,
@@ -60,13 +60,13 @@ module e203_biu(
   `ifdef E203_HAS_MEM_ITF //{
   //////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////
-  // the icb interface from ifetch 
+  // the icb interface from ifetch
   //
   //    * bus cmd channel
   input                          ifu2biu_icb_cmd_valid,
   output                         ifu2biu_icb_cmd_ready,
-  input  [`E203_ADDR_SIZE-1:0]   ifu2biu_icb_cmd_addr, 
-  input                          ifu2biu_icb_cmd_read, 
+  input  [`E203_ADDR_SIZE-1:0]   ifu2biu_icb_cmd_addr,
+  input                          ifu2biu_icb_cmd_read,
   input  [`E203_XLEN-1:0]        ifu2biu_icb_cmd_wdata,
   input  [`E203_XLEN/8-1:0]      ifu2biu_icb_cmd_wmask,
   input  [1:0]                   ifu2biu_icb_cmd_burst,
@@ -96,8 +96,8 @@ module e203_biu(
   //    * Bus cmd channel
   output                         ppi_icb_cmd_valid,
   input                          ppi_icb_cmd_ready,
-  output [`E203_ADDR_SIZE-1:0]   ppi_icb_cmd_addr, 
-  output                         ppi_icb_cmd_read, 
+  output [`E203_ADDR_SIZE-1:0]   ppi_icb_cmd_addr,
+  output                         ppi_icb_cmd_read,
   output [`E203_XLEN-1:0]        ppi_icb_cmd_wdata,
   output [`E203_XLEN/8-1:0]      ppi_icb_cmd_wmask,
   output [1:0]                   ppi_icb_cmd_burst,
@@ -119,8 +119,8 @@ module e203_biu(
   //    * Bus cmd channel
   output                         clint_icb_cmd_valid,
   input                          clint_icb_cmd_ready,
-  output [`E203_ADDR_SIZE-1:0]   clint_icb_cmd_addr, 
-  output                         clint_icb_cmd_read, 
+  output [`E203_ADDR_SIZE-1:0]   clint_icb_cmd_addr,
+  output                         clint_icb_cmd_read,
   output [`E203_XLEN-1:0]        clint_icb_cmd_wdata,
   output [`E203_XLEN/8-1:0]      clint_icb_cmd_wmask,
   output [1:0]                   clint_icb_cmd_burst,
@@ -142,8 +142,8 @@ module e203_biu(
   //    * Bus cmd channel
   output                         plic_icb_cmd_valid,
   input                          plic_icb_cmd_ready,
-  output [`E203_ADDR_SIZE-1:0]   plic_icb_cmd_addr, 
-  output                         plic_icb_cmd_read, 
+  output [`E203_ADDR_SIZE-1:0]   plic_icb_cmd_addr,
+  output                         plic_icb_cmd_read,
   output [`E203_XLEN-1:0]        plic_icb_cmd_wdata,
   output [`E203_XLEN/8-1:0]      plic_icb_cmd_wmask,
   output [1:0]                   plic_icb_cmd_burst,
@@ -170,8 +170,8 @@ module e203_biu(
   //    * Bus cmd channel
   output                         fio_icb_cmd_valid,
   input                          fio_icb_cmd_ready,
-  output [`E203_ADDR_SIZE-1:0]   fio_icb_cmd_addr, 
-  output                         fio_icb_cmd_read, 
+  output [`E203_ADDR_SIZE-1:0]   fio_icb_cmd_addr,
+  output                         fio_icb_cmd_read,
   output [`E203_XLEN-1:0]        fio_icb_cmd_wdata,
   output [`E203_XLEN/8-1:0]      fio_icb_cmd_wmask,
   output [1:0]                   fio_icb_cmd_burst,
@@ -191,14 +191,14 @@ module e203_biu(
   `ifdef E203_HAS_MEM_ITF //{
   //////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////
-  // The ICB Interface from Ifetch 
+  // The ICB Interface from Ifetch
   //
   input                          mem_icb_enable,
   //    * Bus cmd channel
   output                         mem_icb_cmd_valid,
   input                          mem_icb_cmd_ready,
-  output [`E203_ADDR_SIZE-1:0]   mem_icb_cmd_addr, 
-  output                         mem_icb_cmd_read, 
+  output [`E203_ADDR_SIZE-1:0]   mem_icb_cmd_addr,
+  output                         mem_icb_cmd_read,
   output [`E203_XLEN-1:0]        mem_icb_cmd_wdata,
   output [`E203_XLEN/8-1:0]      mem_icb_cmd_wmask,
   output [1:0]                   mem_icb_cmd_burst,
@@ -228,9 +228,9 @@ module e203_biu(
       localparam BIU_ARBT_I_PTR_W = 1;
   `endif//}
 
-  
+
   // The SPLT_NUM is the sum of following components
-  //   * ppi, clint, plic, SystemITF, Fast-IO, IFU-err 
+  //   * ppi, clint, plic, SystemITF, Fast-IO, IFU-err
       localparam BIU_SPLT_I_NUM_0 = 4;
 
   `ifdef E203_HAS_MEM_ITF //{
@@ -249,8 +249,8 @@ module e203_biu(
 
   wire                         ifuerr_icb_cmd_valid;
   wire                         ifuerr_icb_cmd_ready;
-  wire [`E203_ADDR_SIZE-1:0]   ifuerr_icb_cmd_addr; 
-  wire                         ifuerr_icb_cmd_read; 
+  wire [`E203_ADDR_SIZE-1:0]   ifuerr_icb_cmd_addr;
+  wire                         ifuerr_icb_cmd_read;
   wire [2-1:0]                 ifuerr_icb_cmd_burst;
   wire [2-1:0]                 ifuerr_icb_cmd_beat;
   wire [`E203_XLEN-1:0]        ifuerr_icb_cmd_wdata;
@@ -258,7 +258,7 @@ module e203_biu(
   wire                         ifuerr_icb_cmd_lock;
   wire                         ifuerr_icb_cmd_excl;
   wire [1:0]                   ifuerr_icb_cmd_size;
-  
+
   wire                         ifuerr_icb_rsp_valid;
   wire                         ifuerr_icb_rsp_ready;
   wire                         ifuerr_icb_rsp_err  ;
@@ -345,7 +345,7 @@ module e203_biu(
                            `endif//}
                              lsu2biu_icb_cmd_wmask
                            } ;
-                         
+
   assign arbt_bus_icb_cmd_burst =
                            {
                            `ifdef E203_HAS_MEM_ITF //{
@@ -353,7 +353,7 @@ module e203_biu(
                            `endif//}
                              lsu2biu_icb_cmd_burst
                            } ;
-                         
+
   assign arbt_bus_icb_cmd_beat =
                            {
                            `ifdef E203_HAS_MEM_ITF //{
@@ -361,7 +361,7 @@ module e203_biu(
                            `endif//}
                              lsu2biu_icb_cmd_beat
                            } ;
-                         
+
   assign arbt_bus_icb_cmd_lock =
                            {
                            `ifdef E203_HAS_MEM_ITF //{
@@ -377,7 +377,7 @@ module e203_biu(
                            `endif//}
                              lsu2biu_icb_cmd_excl
                            } ;
-                           
+
   assign arbt_bus_icb_cmd_size =
                            {
                            `ifdef E203_HAS_MEM_ITF //{
@@ -424,7 +424,7 @@ module e203_biu(
                            `endif//}
                              lsu2biu_icb_rsp_excl_ok
                            } = arbt_bus_icb_rsp_excl_ok;
-                           
+
   assign                   {
                            `ifdef E203_HAS_MEM_ITF //{
                              ifu2biu_icb_rsp_rdata,
@@ -449,7 +449,7 @@ module e203_biu(
   .ARBT_PTR_W (BIU_ARBT_I_PTR_W),
   .USR_W      (1),
   .AW         (`E203_ADDR_SIZE),
-  .DW         (`E203_XLEN) 
+  .DW         (`E203_XLEN)
   ) u_biu_icb_arbt(
   .o_icb_cmd_valid        (arbt_icb_cmd_valid )     ,
   .o_icb_cmd_ready        (arbt_icb_cmd_ready )     ,
@@ -463,14 +463,14 @@ module e203_biu(
   .o_icb_cmd_lock         (arbt_icb_cmd_lock )     ,
   .o_icb_cmd_size         (arbt_icb_cmd_size )     ,
   .o_icb_cmd_usr          (arbt_icb_cmd_usr  )     ,
-                                
+
   .o_icb_rsp_valid        (arbt_icb_rsp_valid )     ,
   .o_icb_rsp_ready        (arbt_icb_rsp_ready )     ,
   .o_icb_rsp_err          (arbt_icb_rsp_err)        ,
   .o_icb_rsp_excl_ok      (arbt_icb_rsp_excl_ok)    ,
   .o_icb_rsp_rdata        (arbt_icb_rsp_rdata )     ,
   .o_icb_rsp_usr          (1'b0   )     ,
-                               
+
   .i_bus_icb_cmd_ready    (arbt_bus_icb_cmd_ready ) ,
   .i_bus_icb_cmd_valid    (arbt_bus_icb_cmd_valid ) ,
   .i_bus_icb_cmd_read     (arbt_bus_icb_cmd_read )  ,
@@ -483,26 +483,26 @@ module e203_biu(
   .i_bus_icb_cmd_lock     (arbt_bus_icb_cmd_lock ),
   .i_bus_icb_cmd_size     (arbt_bus_icb_cmd_size ),
   .i_bus_icb_cmd_usr      (arbt_bus_icb_cmd_usr ),
-                                
+
   .i_bus_icb_rsp_valid    (arbt_bus_icb_rsp_valid ) ,
   .i_bus_icb_rsp_ready    (arbt_bus_icb_rsp_ready ) ,
   .i_bus_icb_rsp_err      (arbt_bus_icb_rsp_err)    ,
   .i_bus_icb_rsp_excl_ok  (arbt_bus_icb_rsp_excl_ok),
   .i_bus_icb_rsp_rdata    (arbt_bus_icb_rsp_rdata ) ,
   .i_bus_icb_rsp_usr      () ,
-                             
+
   .clk                    (clk  )                     ,
   .rst_n                  (rst_n)
   );
 
-  //// To breakup the dead-lock cases, when incoming load/store request to the BIU but not granted 
+  //// To breakup the dead-lock cases, when incoming load/store request to the BIU but not granted
   ////  This kind of potential deadlock case only happened at the low end core, where the ifetch response
   ////  provided to IFU, but IFU cannot accept it because it is waiting the IR stage to be cleared, and IR
   ////  stage is waiting the LSU to be cleared, and LSU is waiting this BIU to be cleared.
   //// At any mid of high end core (or with multiple oustandings), we definitely will update IFU
   ////  to make sure it always can accept any oustanding transactions traded with area cost.
   //// So back to this very low end core, to save areas, we prefetch without knowing if IR can accept
-  ////  the response or not, and also in very low end core it is just 1 oustanding (multiple oustanding 
+  ////  the response or not, and also in very low end core it is just 1 oustanding (multiple oustanding
   ////  belong to mid or high end core), so to cut off this deadlocks, we just let the BIU to trigger
   ////  and replay indication if LSU cannot get granted, if IFU just overkilly forced to be replayed, it
   ////  just lost performance, but we dont care, because in low end core, ifetch to system mem is not
@@ -546,7 +546,7 @@ module e203_biu(
   sirv_gnrl_icb_buffer # (
     .OUTS_CNT_W   (`E203_BIU_OUTS_CNT_W),
     .AW    (`E203_ADDR_SIZE),
-    .DW    (`E203_XLEN), 
+    .DW    (`E203_XLEN),
     .CMD_DP(`E203_BIU_CMD_DP),
     .RSP_DP(`E203_BIU_RSP_DP),
     .CMD_CUT_READY (`E203_BIU_CMD_CUT_READY),
@@ -566,14 +566,14 @@ module e203_biu(
     .i_icb_cmd_burst        (arbt_icb_cmd_burst),
     .i_icb_cmd_beat         (arbt_icb_cmd_beat ),
     .i_icb_cmd_usr          (arbt_icb_cmd_usr  ),
-                     
+
     .i_icb_rsp_valid        (arbt_icb_rsp_valid),
     .i_icb_rsp_ready        (arbt_icb_rsp_ready),
     .i_icb_rsp_err          (arbt_icb_rsp_err  ),
     .i_icb_rsp_excl_ok      (arbt_icb_rsp_excl_ok),
     .i_icb_rsp_rdata        (arbt_icb_rsp_rdata),
     .i_icb_rsp_usr          (),
-    
+
     .o_icb_cmd_valid        (buf_icb_cmd_valid),
     .o_icb_cmd_ready        (buf_icb_cmd_ready),
     .o_icb_cmd_read         (buf_icb_cmd_read ),
@@ -586,7 +586,7 @@ module e203_biu(
     .o_icb_cmd_burst        (buf_icb_cmd_burst),
     .o_icb_cmd_beat         (buf_icb_cmd_beat ),
     .o_icb_cmd_usr          (buf_icb_cmd_usr),
-                         
+
     .o_icb_rsp_valid        (buf_icb_rsp_valid),
     .o_icb_rsp_ready        (buf_icb_rsp_ready),
     .o_icb_rsp_err          (buf_icb_rsp_err  ),
@@ -681,7 +681,7 @@ module e203_biu(
                            , mem_icb_cmd_wmask
                            `endif//}
                            } = splt_bus_icb_cmd_wmask;
-                         
+
   assign {
                              ifuerr_icb_cmd_burst
                            , ppi_icb_cmd_burst
@@ -694,7 +694,7 @@ module e203_biu(
                            , mem_icb_cmd_burst
                            `endif//}
                            } = splt_bus_icb_cmd_burst;
-                         
+
   assign {
                              ifuerr_icb_cmd_beat
                            , ppi_icb_cmd_beat
@@ -707,7 +707,7 @@ module e203_biu(
                            , mem_icb_cmd_beat
                            `endif//}
                            } = splt_bus_icb_cmd_beat;
-                         
+
   assign {
                              ifuerr_icb_cmd_lock
                            , ppi_icb_cmd_lock
@@ -733,7 +733,7 @@ module e203_biu(
                            , mem_icb_cmd_excl
                            `endif//}
                            } = splt_bus_icb_cmd_excl;
-                           
+
   assign {
                              ifuerr_icb_cmd_size
                            , ppi_icb_cmd_size
@@ -841,8 +841,8 @@ module e203_biu(
   `endif//}
 
   wire buf_icb_sel_ifuerr =(
-                            buf_icb_cmd_ppi 
-                          | buf_icb_cmd_clint 
+                            buf_icb_cmd_ppi
+                          | buf_icb_cmd_clint
                           | buf_icb_cmd_plic
                            `ifdef E203_HAS_FIO //{
                           | buf_icb_cmd_fio
@@ -850,7 +850,7 @@ module e203_biu(
                            ) & buf_icb_cmd_ifu;
 
   `ifdef E203_HAS_MEM_ITF //{
-  wire buf_icb_sel_mem = mem_icb_enable 
+  wire buf_icb_sel_mem = mem_icb_enable
                              & (~buf_icb_sel_ifuerr)
                              & (~buf_icb_sel_ppi)
                              & (~buf_icb_sel_clint)
@@ -861,7 +861,7 @@ module e203_biu(
                              ;
   `endif//}
 
-  wire [BIU_SPLT_I_NUM-1:0] buf_icb_splt_indic = 
+  wire [BIU_SPLT_I_NUM-1:0] buf_icb_splt_indic =
       {
                              buf_icb_sel_ifuerr
                            , buf_icb_sel_ppi
@@ -887,9 +887,9 @@ module e203_biu(
   .SPLT_PTR_1HOT (1),
   .USR_W      (1),
   .AW         (`E203_ADDR_SIZE),
-  .DW         (`E203_XLEN) 
+  .DW         (`E203_XLEN)
   ) u_biu_icb_splt(
-  .i_icb_splt_indic       (buf_icb_splt_indic),        
+  .i_icb_splt_indic       (buf_icb_splt_indic),
 
   .i_icb_cmd_valid        (buf_icb_cmd_valid )     ,
   .i_icb_cmd_ready        (buf_icb_cmd_ready )     ,
@@ -903,14 +903,14 @@ module e203_biu(
   .i_icb_cmd_lock         (buf_icb_cmd_lock )     ,
   .i_icb_cmd_size         (buf_icb_cmd_size )     ,
   .i_icb_cmd_usr          (1'b0   )     ,
- 
+
   .i_icb_rsp_valid        (buf_icb_rsp_valid )     ,
   .i_icb_rsp_ready        (buf_icb_rsp_ready )     ,
   .i_icb_rsp_err          (buf_icb_rsp_err)        ,
   .i_icb_rsp_excl_ok      (buf_icb_rsp_excl_ok)    ,
   .i_icb_rsp_rdata        (buf_icb_rsp_rdata )     ,
   .i_icb_rsp_usr          ( )     ,
-                               
+
   .o_bus_icb_cmd_ready    (splt_bus_icb_cmd_ready ) ,
   .o_bus_icb_cmd_valid    (splt_bus_icb_cmd_valid ) ,
   .o_bus_icb_cmd_read     (splt_bus_icb_cmd_read )  ,
@@ -923,27 +923,27 @@ module e203_biu(
   .o_bus_icb_cmd_lock     (splt_bus_icb_cmd_lock ),
   .o_bus_icb_cmd_size     (splt_bus_icb_cmd_size ),
   .o_bus_icb_cmd_usr      ()     ,
-  
+
   .o_bus_icb_rsp_valid    (splt_bus_icb_rsp_valid ) ,
   .o_bus_icb_rsp_ready    (splt_bus_icb_rsp_ready ) ,
   .o_bus_icb_rsp_err      (splt_bus_icb_rsp_err)    ,
   .o_bus_icb_rsp_excl_ok  (splt_bus_icb_rsp_excl_ok),
   .o_bus_icb_rsp_rdata    (splt_bus_icb_rsp_rdata ) ,
   .o_bus_icb_rsp_usr      ({BIU_SPLT_I_NUM{1'b0}}) ,
-                             
+
   .clk                    (clk  )                     ,
   .rst_n                  (rst_n)
   );
 
 
-  assign biu_active = ifu2biu_icb_cmd_valid | lsu2biu_icb_cmd_valid | icb_buffer_active; 
+  assign biu_active = ifu2biu_icb_cmd_valid | lsu2biu_icb_cmd_valid | icb_buffer_active;
 
   ///////////////////////////////////////////////////////////////
   ///////////////////////////////////////////////////////////////
   ///////////////////////////////////////////////////////////////
   // Implement the IFU-accessed-Peripheral region error
   assign  ifuerr_icb_cmd_ready = ifuerr_icb_rsp_ready;
-  
+
      // 0 Cycle response
   assign  ifuerr_icb_rsp_valid = ifuerr_icb_cmd_valid;
   assign  ifuerr_icb_rsp_err   = 1'b1;

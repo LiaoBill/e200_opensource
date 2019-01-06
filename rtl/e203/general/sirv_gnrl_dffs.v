@@ -194,6 +194,7 @@ module sirv_gnrl_dffrs # (
 
 reg [DW-1:0] qout_r;
 
+// clk上升沿或者reset下降沿的时候触发
 always @(posedge clk or negedge rst_n)
 begin : DFFRS_PROC
   if (rst_n == 1'b0)

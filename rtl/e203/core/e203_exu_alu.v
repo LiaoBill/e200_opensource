@@ -1,21 +1,21 @@
- /*                                                                      
- Copyright 2017 Silicon Integrated Microelectronics, Inc.                
-                                                                         
- Licensed under the Apache License, Version 2.0 (the "License");         
- you may not use this file except in compliance with the License.        
- You may obtain a copy of the License at                                 
-                                                                         
-     http://www.apache.org/licenses/LICENSE-2.0                          
-                                                                         
-  Unless required by applicable law or agreed to in writing, software    
- distributed under the License is distributed on an "AS IS" BASIS,       
+ /*
+ Copyright 2017 Silicon Integrated Microelectronics, Inc.
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- See the License for the specific language governing permissions and     
- limitations under the License.                                          
- */                                                                      
-                                                                         
-                                                                         
-                                                                         
+ See the License for the specific language governing permissions and
+ limitations under the License.
+ */
+
+
+
 //=====================================================================
 //--        _______   ___
 //--       (   ____/ /__/
@@ -30,7 +30,7 @@
 // Description:
 //  The ALU module to implement the compute function unit
 //    and the AGU (address generate unit) for LSU is also handled by ALU
-//    additionaly, the shared-impelmentation of MUL and DIV instruction 
+//    additionaly, the shared-impelmentation of MUL and DIV instruction
 //    is also shared by ALU in E200
 //
 // ====================================================================
@@ -40,10 +40,10 @@ module e203_exu_alu(
 
   //////////////////////////////////////////////////////////////
   // The operands and decode info from dispatch
-  input  i_valid, 
-  output i_ready, 
+  input  i_valid,
+  output i_ready,
 
-  output i_longpipe, // Indicate this instruction is 
+  output i_longpipe, // Indicate this instruction is
                      //   issued as a long pipe instruction
 
   `ifdef E203_HAS_CSR_EAI//{
@@ -61,12 +61,12 @@ module e203_exu_alu(
   output amo_wait,
   input  oitf_empty,
 
-                     
+
   input  [`E203_ITAG_WIDTH-1:0] i_itag,
   input  [`E203_XLEN-1:0] i_rs1,
   input  [`E203_XLEN-1:0] i_rs2,
   input  [`E203_XLEN-1:0] i_imm,
-  input  [`E203_DECINFO_WIDTH-1:0]  i_info,  
+  input  [`E203_DECINFO_WIDTH-1:0]  i_info,
   input  [`E203_PC_SIZE-1:0] i_pc,
   input  [`E203_INSTR_SIZE-1:0] i_instr,
   input  i_pc_vld,
@@ -84,12 +84,12 @@ module e203_exu_alu(
   // The Commit Interface
   output cmt_o_valid, // Handshake valid
   input  cmt_o_ready, // Handshake ready
-  output cmt_o_pc_vld,  
-  output [`E203_PC_SIZE-1:0] cmt_o_pc,  
-  output [`E203_INSTR_SIZE-1:0] cmt_o_instr,  
+  output cmt_o_pc_vld,
+  output [`E203_PC_SIZE-1:0] cmt_o_pc,
+  output [`E203_INSTR_SIZE-1:0] cmt_o_instr,
   output [`E203_XLEN-1:0]    cmt_o_imm,// The resolved ture/false
     //   The Branch and Jump Commit
-  output cmt_o_rv32,// The predicted ture/false  
+  output cmt_o_rv32,// The predicted ture/false
   output cmt_o_bjp,
   output cmt_o_mret,
   output cmt_o_dret,
@@ -100,9 +100,9 @@ module e203_exu_alu(
   output cmt_o_ifu_misalgn,
   output cmt_o_ifu_buserr,
   output cmt_o_ifu_ilegl,
-  output cmt_o_bjp_prdt,// The predicted ture/false  
+  output cmt_o_bjp_prdt,// The predicted ture/false
   output cmt_o_bjp_rslv,// The resolved ture/false
-    //   The AGU Exception 
+    //   The AGU Exception
   output cmt_o_misalgn, // The misalign exception generated
   output cmt_o_ld,
   output cmt_o_stamo,
@@ -116,7 +116,7 @@ module e203_exu_alu(
   input  wbck_o_ready, // Handshake ready
   output [`E203_XLEN-1:0] wbck_o_wdat,
   output [`E203_RFIDX_WIDTH-1:0] wbck_o_rdidx,
-  
+
   input  mdv_nob2b,
 
   //////////////////////////////////////////////////////////////
@@ -137,18 +137,18 @@ module e203_exu_alu(
   //    * Bus cmd channel
   output                         agu_icb_cmd_valid, // Handshake valid
   input                          agu_icb_cmd_ready, // Handshake ready
-  output [`E203_ADDR_SIZE-1:0]   agu_icb_cmd_addr, // Bus transaction start addr 
+  output [`E203_ADDR_SIZE-1:0]   agu_icb_cmd_addr, // Bus transaction start addr
   output                         agu_icb_cmd_read,   // Read or write
-  output [`E203_XLEN-1:0]        agu_icb_cmd_wdata, 
-  output [`E203_XLEN/8-1:0]      agu_icb_cmd_wmask, 
+  output [`E203_XLEN-1:0]        agu_icb_cmd_wdata,
+  output [`E203_XLEN/8-1:0]      agu_icb_cmd_wmask,
   output                         agu_icb_cmd_lock,
   output                         agu_icb_cmd_excl,
   output [1:0]                   agu_icb_cmd_size,
-  output                         agu_icb_cmd_back2agu, 
+  output                         agu_icb_cmd_back2agu,
   output                         agu_icb_cmd_usign,
   output [`E203_ITAG_WIDTH -1:0] agu_icb_cmd_itag,
   //    * Bus RSP channel
-  input                          agu_icb_rsp_valid, // Response valid 
+  input                          agu_icb_rsp_valid, // Response valid
   output                         agu_icb_rsp_ready, // Response ready
   input                          agu_icb_rsp_err  , // Response error
   input                          agu_icb_rsp_excl_ok,
@@ -166,12 +166,12 @@ module e203_exu_alu(
   // Dispatch to different sub-modules according to their types
 
   wire ifu_excp_op = i_ilegl | i_buserr | i_misalgn;
-  wire alu_op = (~ifu_excp_op) & (i_info[`E203_DECINFO_GRP] == `E203_DECINFO_GRP_ALU); 
-  wire agu_op = (~ifu_excp_op) & (i_info[`E203_DECINFO_GRP] == `E203_DECINFO_GRP_AGU); 
-  wire bjp_op = (~ifu_excp_op) & (i_info[`E203_DECINFO_GRP] == `E203_DECINFO_GRP_BJP); 
-  wire csr_op = (~ifu_excp_op) & (i_info[`E203_DECINFO_GRP] == `E203_DECINFO_GRP_CSR); 
+  wire alu_op = (~ifu_excp_op) & (i_info[`E203_DECINFO_GRP] == `E203_DECINFO_GRP_ALU);
+  wire agu_op = (~ifu_excp_op) & (i_info[`E203_DECINFO_GRP] == `E203_DECINFO_GRP_AGU);
+  wire bjp_op = (~ifu_excp_op) & (i_info[`E203_DECINFO_GRP] == `E203_DECINFO_GRP_BJP);
+  wire csr_op = (~ifu_excp_op) & (i_info[`E203_DECINFO_GRP] == `E203_DECINFO_GRP_CSR);
 `ifdef E203_SUPPORT_SHARE_MULDIV //{
-  wire mdv_op = (~ifu_excp_op) & (i_info[`E203_DECINFO_GRP] == `E203_DECINFO_GRP_MULDIV); 
+  wire mdv_op = (~ifu_excp_op) & (i_info[`E203_DECINFO_GRP] == `E203_DECINFO_GRP_MULDIV);
 `endif//E203_SUPPORT_SHARE_MULDIV}
 
   // The ALU incoming instruction may go to several different targets:
@@ -213,9 +213,9 @@ module e203_exu_alu(
   wire mdv_i_longpipe;
 `endif//E203_SUPPORT_SHARE_MULDIV}
 
-  assign i_longpipe = (agu_i_longpipe & agu_op) 
+  assign i_longpipe = (agu_i_longpipe & agu_op)
                    `ifdef E203_SUPPORT_SHARE_MULDIV //{
-                    | (mdv_i_longpipe & mdv_op) 
+                    | (mdv_i_longpipe & mdv_op)
                    `endif//E203_SUPPORT_SHARE_MULDIV}
                    ;
 
@@ -230,8 +230,8 @@ module e203_exu_alu(
   wire  [`E203_XLEN-1:0]           csr_i_rs1   = {`E203_XLEN         {csr_op}} & i_rs1;
   wire  [`E203_XLEN-1:0]           csr_i_rs2   = {`E203_XLEN         {csr_op}} & i_rs2;
   wire  [`E203_XLEN-1:0]           csr_i_imm   = {`E203_XLEN         {csr_op}} & i_imm;
-  wire  [`E203_DECINFO_WIDTH-1:0]  csr_i_info  = {`E203_DECINFO_WIDTH{csr_op}} & i_info;  
-  wire                             csr_i_rdwen =                      csr_op   & i_rdwen;  
+  wire  [`E203_DECINFO_WIDTH-1:0]  csr_i_info  = {`E203_DECINFO_WIDTH{csr_op}} & i_info;
+  wire                             csr_i_rdwen =                      csr_op   & i_rdwen;
 
   `ifndef E203_HAS_EAI//{
   wire eai_o_cmt_wr_reg;
@@ -268,8 +268,8 @@ module e203_exu_alu(
     .read_csr_dat     (read_csr_dat),
     .wbck_csr_dat     (wbck_csr_dat),
 
-    .csr_o_valid      (csr_o_valid      ),   
-    .csr_o_ready      (csr_o_ready      ),   
+    .csr_o_valid      (csr_o_valid      ),
+    .csr_o_ready      (csr_o_ready      ),
     .csr_o_wbck_wdat  (csr_o_wbck_wdat  ),
     .csr_o_wbck_err   (csr_o_wbck_err   ),
 
@@ -280,8 +280,8 @@ module e203_exu_alu(
   //////////////////////////////////////////////////////////////
   // Instantiate the BJP module
   //
-  wire bjp_o_valid; 
-  wire bjp_o_ready; 
+  wire bjp_o_valid;
+  wire bjp_o_ready;
   wire [`E203_XLEN-1:0] bjp_o_wbck_wdat;
   wire bjp_o_wbck_err;
   wire bjp_o_cmt_bjp;
@@ -306,8 +306,8 @@ module e203_exu_alu(
   wire  [`E203_XLEN-1:0]           bjp_i_rs1  = {`E203_XLEN         {bjp_op}} & i_rs1;
   wire  [`E203_XLEN-1:0]           bjp_i_rs2  = {`E203_XLEN         {bjp_op}} & i_rs2;
   wire  [`E203_XLEN-1:0]           bjp_i_imm  = {`E203_XLEN         {bjp_op}} & i_imm;
-  wire  [`E203_DECINFO_WIDTH-1:0]  bjp_i_info = {`E203_DECINFO_WIDTH{bjp_op}} & i_info;  
-  wire  [`E203_PC_SIZE-1:0]        bjp_i_pc   = {`E203_PC_SIZE      {bjp_op}} & i_pc;  
+  wire  [`E203_DECINFO_WIDTH-1:0]  bjp_i_info = {`E203_DECINFO_WIDTH{bjp_op}} & i_info;
+  wire  [`E203_PC_SIZE-1:0]        bjp_i_pc   = {`E203_PC_SIZE      {bjp_op}} & i_pc;
 
   e203_exu_alu_bjp u_e203_exu_alu_bjp(
       .bjp_i_valid         (bjp_i_valid         ),
@@ -348,22 +348,22 @@ module e203_exu_alu(
 
 
 
-  
+
   //////////////////////////////////////////////////////////////
   // Instantiate the AGU module
   //
-  wire agu_o_valid; 
-  wire agu_o_ready; 
-  
+  wire agu_o_valid;
+  wire agu_o_ready;
+
   wire [`E203_XLEN-1:0] agu_o_wbck_wdat;
-  wire agu_o_wbck_err;   
-  
-  wire agu_o_cmt_misalgn; 
-  wire agu_o_cmt_ld; 
-  wire agu_o_cmt_stamo; 
-  wire agu_o_cmt_buserr ; 
-  wire [`E203_ADDR_SIZE-1:0]agu_o_cmt_badaddr ; 
-  
+  wire agu_o_wbck_err;
+
+  wire agu_o_cmt_misalgn;
+  wire agu_o_cmt_ld;
+  wire agu_o_cmt_stamo;
+  wire agu_o_cmt_buserr ;
+  wire [`E203_ADDR_SIZE-1:0]agu_o_cmt_badaddr ;
+
   wire [`E203_XLEN-1:0] agu_req_alu_op1;
   wire [`E203_XLEN-1:0] agu_req_alu_op2;
   wire agu_req_alu_swap;
@@ -376,7 +376,7 @@ module e203_exu_alu(
   wire agu_req_alu_maxu;
   wire agu_req_alu_minu;
   wire [`E203_XLEN-1:0] agu_req_alu_res;
-     
+
   wire agu_sbf_0_ena;
   wire [`E203_XLEN-1:0] agu_sbf_0_nxt;
   wire [`E203_XLEN-1:0] agu_sbf_0_r;
@@ -387,8 +387,8 @@ module e203_exu_alu(
   wire  [`E203_XLEN-1:0]           agu_i_rs1  = {`E203_XLEN         {agu_op}} & i_rs1;
   wire  [`E203_XLEN-1:0]           agu_i_rs2  = {`E203_XLEN         {agu_op}} & i_rs2;
   wire  [`E203_XLEN-1:0]           agu_i_imm  = {`E203_XLEN         {agu_op}} & i_imm;
-  wire  [`E203_DECINFO_WIDTH-1:0]  agu_i_info = {`E203_DECINFO_WIDTH{agu_op}} & i_info;  
-  wire  [`E203_ITAG_WIDTH-1:0]     agu_i_itag = {`E203_ITAG_WIDTH   {agu_op}} & i_itag;  
+  wire  [`E203_DECINFO_WIDTH-1:0]  agu_i_info = {`E203_DECINFO_WIDTH{agu_op}} & i_info;
+  wire  [`E203_ITAG_WIDTH-1:0]     agu_i_itag = {`E203_ITAG_WIDTH   {agu_op}} & i_itag;
 
 
   e203_exu_alu_lsuagu u_e203_exu_alu_lsuagu(
@@ -416,7 +416,7 @@ module e203_exu_alu(
       .agu_o_cmt_stamo     (agu_o_cmt_stamo     ),
       .agu_o_cmt_buserr    (agu_o_cmt_buserr    ),
       .agu_o_cmt_badaddr   (agu_o_cmt_badaddr   ),
-                                                
+
       .agu_icb_cmd_valid   (agu_icb_cmd_valid   ),
       .agu_icb_cmd_ready   (agu_icb_cmd_ready   ),
       .agu_icb_cmd_addr    (agu_icb_cmd_addr    ),
@@ -434,7 +434,7 @@ module e203_exu_alu(
       .agu_icb_rsp_err     (agu_icb_rsp_err     ),
       .agu_icb_rsp_excl_ok (agu_icb_rsp_excl_ok ),
       .agu_icb_rsp_rdata   (agu_icb_rsp_rdata   ),
-                                                
+
       .agu_req_alu_op1     (agu_req_alu_op1     ),
       .agu_req_alu_op2     (agu_req_alu_op2     ),
       .agu_req_alu_swap    (agu_req_alu_swap    ),
@@ -447,15 +447,15 @@ module e203_exu_alu(
       .agu_req_alu_maxu    (agu_req_alu_maxu    ),
       .agu_req_alu_minu    (agu_req_alu_minu    ),
       .agu_req_alu_res     (agu_req_alu_res     ),
-                                                
+
       .agu_sbf_0_ena       (agu_sbf_0_ena       ),
       .agu_sbf_0_nxt       (agu_sbf_0_nxt       ),
       .agu_sbf_0_r         (agu_sbf_0_r         ),
-                                                
+
       .agu_sbf_1_ena       (agu_sbf_1_ena       ),
       .agu_sbf_1_nxt       (agu_sbf_1_nxt       ),
       .agu_sbf_1_r         (agu_sbf_1_r         ),
-     
+
       .clk                 (clk),
       .rst_n               (rst_n)
   );
@@ -463,10 +463,10 @@ module e203_exu_alu(
   //////////////////////////////////////////////////////////////
   // Instantiate the regular ALU module
   //
-  wire alu_o_valid; 
-  wire alu_o_ready; 
+  wire alu_o_valid;
+  wire alu_o_ready;
   wire [`E203_XLEN-1:0] alu_o_wbck_wdat;
-  wire alu_o_wbck_err;   
+  wire alu_o_wbck_err;
   wire alu_o_cmt_ecall;
   wire alu_o_cmt_ebreak;
   wire alu_o_cmt_wfi;
@@ -489,8 +489,8 @@ module e203_exu_alu(
   wire  [`E203_XLEN-1:0]           alu_i_rs1  = {`E203_XLEN         {alu_op}} & i_rs1;
   wire  [`E203_XLEN-1:0]           alu_i_rs2  = {`E203_XLEN         {alu_op}} & i_rs2;
   wire  [`E203_XLEN-1:0]           alu_i_imm  = {`E203_XLEN         {alu_op}} & i_imm;
-  wire  [`E203_DECINFO_WIDTH-1:0]  alu_i_info = {`E203_DECINFO_WIDTH{alu_op}} & i_info;  
-  wire  [`E203_PC_SIZE-1:0]        alu_i_pc   = {`E203_PC_SIZE      {alu_op}} & i_pc;  
+  wire  [`E203_DECINFO_WIDTH-1:0]  alu_i_info = {`E203_DECINFO_WIDTH{alu_op}} & i_info;
+  wire  [`E203_PC_SIZE-1:0]        alu_i_pc   = {`E203_PC_SIZE      {alu_op}} & i_pc;
 
   e203_exu_alu_rglr u_e203_exu_alu_rglr(
 
@@ -526,7 +526,7 @@ module e203_exu_alu(
       .alu_req_alu_res     (alu_req_alu_res       ),
 
       .clk                 (clk           ),
-      .rst_n               (rst_n         ) 
+      .rst_n               (rst_n         )
   );
 
 `ifdef E203_SUPPORT_SHARE_MULDIV //{
@@ -535,10 +535,10 @@ module e203_exu_alu(
   wire [`E203_XLEN-1:0]           mdv_i_rs1  = {`E203_XLEN         {mdv_op}} & i_rs1;
   wire [`E203_XLEN-1:0]           mdv_i_rs2  = {`E203_XLEN         {mdv_op}} & i_rs2;
   wire [`E203_XLEN-1:0]           mdv_i_imm  = {`E203_XLEN         {mdv_op}} & i_imm;
-  wire [`E203_DECINFO_WIDTH-1:0]  mdv_i_info = {`E203_DECINFO_WIDTH{mdv_op}} & i_info;  
-  wire  [`E203_ITAG_WIDTH-1:0]    mdv_i_itag = {`E203_ITAG_WIDTH   {mdv_op}} & i_itag;  
+  wire [`E203_DECINFO_WIDTH-1:0]  mdv_i_info = {`E203_DECINFO_WIDTH{mdv_op}} & i_info;
+  wire  [`E203_ITAG_WIDTH-1:0]    mdv_i_itag = {`E203_ITAG_WIDTH   {mdv_op}} & i_itag;
 
-  wire mdv_o_valid; 
+  wire mdv_o_valid;
   wire mdv_o_ready;
   wire [`E203_XLEN-1:0] mdv_o_wbck_wdat;
   wire mdv_o_wbck_err;
@@ -562,14 +562,14 @@ module e203_exu_alu(
 
       .muldiv_i_valid      (mdv_i_valid    ),
       .muldiv_i_ready      (mdv_i_ready    ),
-                           
+
       .muldiv_i_rs1        (mdv_i_rs1      ),
       .muldiv_i_rs2        (mdv_i_rs2      ),
       .muldiv_i_imm        (mdv_i_imm      ),
       .muldiv_i_info       (mdv_i_info[`E203_DECINFO_MULDIV_WIDTH-1:0]),
       .muldiv_i_longpipe   (mdv_i_longpipe ),
       .muldiv_i_itag       (mdv_i_itag     ),
-                          
+
 
       .flush_pulse         (flush_pulse    ),
 
@@ -583,17 +583,17 @@ module e203_exu_alu(
       .muldiv_req_alu_add  (muldiv_req_alu_add),
       .muldiv_req_alu_sub  (muldiv_req_alu_sub),
       .muldiv_req_alu_res  (muldiv_req_alu_res),
-      
+
       .muldiv_sbf_0_ena    (muldiv_sbf_0_ena  ),
       .muldiv_sbf_0_nxt    (muldiv_sbf_0_nxt  ),
       .muldiv_sbf_0_r      (muldiv_sbf_0_r    ),
-     
+
       .muldiv_sbf_1_ena    (muldiv_sbf_1_ena  ),
       .muldiv_sbf_1_nxt    (muldiv_sbf_1_nxt  ),
       .muldiv_sbf_1_r      (muldiv_sbf_1_r    ),
 
       .clk                 (clk               ),
-      .rst_n               (rst_n             ) 
+      .rst_n               (rst_n             )
   );
 `endif//E203_SUPPORT_SHARE_MULDIV}
 
@@ -612,7 +612,7 @@ module e203_exu_alu(
   wire agu_req_alu = agu_op;// Since AGU may have some other features, so always need ALU datapath
 
   e203_exu_alu_dpath u_e203_exu_alu_dpath(
-      .alu_req_alu         (alu_req_alu           ),    
+      .alu_req_alu         (alu_req_alu           ),
       .alu_req_alu_add     (alu_req_alu_add       ),
       .alu_req_alu_sub     (alu_req_alu_sub       ),
       .alu_req_alu_xor     (alu_req_alu_xor       ),
@@ -627,7 +627,7 @@ module e203_exu_alu(
       .alu_req_alu_op1     (alu_req_alu_op1       ),
       .alu_req_alu_op2     (alu_req_alu_op2       ),
       .alu_req_alu_res     (alu_req_alu_res       ),
-           
+
       .bjp_req_alu         (bjp_req_alu           ),
       .bjp_req_alu_op1     (bjp_req_alu_op1       ),
       .bjp_req_alu_op2     (bjp_req_alu_op2       ),
@@ -640,7 +640,7 @@ module e203_exu_alu(
       .bjp_req_alu_add     (bjp_req_alu_add       ),
       .bjp_req_alu_cmp_res (bjp_req_alu_cmp_res   ),
       .bjp_req_alu_add_res (bjp_req_alu_add_res   ),
-             
+
       .agu_req_alu         (agu_req_alu           ),
       .agu_req_alu_op1     (agu_req_alu_op1       ),
       .agu_req_alu_op2     (agu_req_alu_op2       ),
@@ -654,14 +654,14 @@ module e203_exu_alu(
       .agu_req_alu_maxu    (agu_req_alu_maxu      ),
       .agu_req_alu_minu    (agu_req_alu_minu      ),
       .agu_req_alu_res     (agu_req_alu_res       ),
-             
+
       .agu_sbf_0_ena       (agu_sbf_0_ena         ),
       .agu_sbf_0_nxt       (agu_sbf_0_nxt         ),
       .agu_sbf_0_r         (agu_sbf_0_r           ),
-            
+
       .agu_sbf_1_ena       (agu_sbf_1_ena         ),
       .agu_sbf_1_nxt       (agu_sbf_1_nxt         ),
-      .agu_sbf_1_r         (agu_sbf_1_r           ),      
+      .agu_sbf_1_r         (agu_sbf_1_r           ),
 
 `ifdef E203_SUPPORT_SHARE_MULDIV //{
       .muldiv_req_alu      (muldiv_req_alu    ),
@@ -671,18 +671,18 @@ module e203_exu_alu(
       .muldiv_req_alu_add  (muldiv_req_alu_add),
       .muldiv_req_alu_sub  (muldiv_req_alu_sub),
       .muldiv_req_alu_res  (muldiv_req_alu_res),
-      
+
       .muldiv_sbf_0_ena    (muldiv_sbf_0_ena  ),
       .muldiv_sbf_0_nxt    (muldiv_sbf_0_nxt  ),
       .muldiv_sbf_0_r      (muldiv_sbf_0_r    ),
-     
+
       .muldiv_sbf_1_ena    (muldiv_sbf_1_ena  ),
       .muldiv_sbf_1_nxt    (muldiv_sbf_1_nxt  ),
       .muldiv_sbf_1_r      (muldiv_sbf_1_r    ),
 `endif//E203_SUPPORT_SHARE_MULDIV}
 
       .clk                 (clk           ),
-      .rst_n               (rst_n         ) 
+      .rst_n               (rst_n         )
     );
 
   wire ifu_excp_o_valid;
@@ -697,7 +697,7 @@ module e203_exu_alu(
 
   //////////////////////////////////////////////////////////////
   // Aribtrate the Result and generate output interfaces
-  // 
+  //
   wire o_valid;
   wire o_ready;
 
@@ -729,7 +729,7 @@ module e203_exu_alu(
   assign bjp_o_ready      = o_sel_bjp & o_ready;
   assign csr_o_ready      = o_sel_csr & o_ready;
 
-  assign wbck_o_wdat = 
+  assign wbck_o_wdat =
                     ({`E203_XLEN{o_sel_alu}} & alu_o_wbck_wdat)
                   | ({`E203_XLEN{o_sel_bjp}} & bjp_o_wbck_wdat)
                   | ({`E203_XLEN{o_sel_csr}} & csr_o_wbck_wdat)
@@ -740,11 +740,11 @@ module e203_exu_alu(
                   | ({`E203_XLEN{o_sel_ifu_excp}} & ifu_excp_o_wbck_wdat)
                   ;
 
-  assign wbck_o_rdidx = i_rdidx; 
+  assign wbck_o_rdidx = i_rdidx;
 
   wire wbck_o_rdwen = i_rdwen;
-                  
-  wire wbck_o_err = 
+
+  wire wbck_o_err =
                     ({1{o_sel_alu}} & alu_o_wbck_err)
                   | ({1{o_sel_bjp}} & bjp_o_wbck_err)
                   | ({1{o_sel_csr}} & csr_o_wbck_err)
@@ -759,21 +759,21 @@ module e203_exu_alu(
   //   * The write-back only needed when the unit need to write-back
   //     the result (need to write RD), and it is not a long-pipe uop
   //     (need to be write back by its long-pipe write-back, not here)
-  //   * Each instruction need to be commited 
+  //   * Each instruction need to be commited
   wire o_need_wbck = wbck_o_rdwen & (~i_longpipe) & (~wbck_o_err);
   wire o_need_cmt  = 1'b1;
-  assign o_ready = 
-           (o_need_cmt  ? cmt_o_ready  : 1'b1)  
-         & (o_need_wbck ? wbck_o_ready : 1'b1); 
+  assign o_ready =
+           (o_need_cmt  ? cmt_o_ready  : 1'b1)
+         & (o_need_wbck ? wbck_o_ready : 1'b1);
 
   assign wbck_o_valid = o_need_wbck & o_valid & (o_need_cmt  ? cmt_o_ready  : 1'b1);
   assign cmt_o_valid  = o_need_cmt  & o_valid & (o_need_wbck ? wbck_o_ready : 1'b1);
-  // 
+  //
   //  The commint interface have some special signals
-  assign cmt_o_instr   = i_instr;  
-  assign cmt_o_pc   = i_pc;  
+  assign cmt_o_instr   = i_instr;
+  assign cmt_o_pc   = i_pc;
   assign cmt_o_imm  = i_imm;
-  assign cmt_o_rv32 = i_info[`E203_DECINFO_RV32]; 
+  assign cmt_o_rv32 = i_info[`E203_DECINFO_RV32];
     // The cmt_o_pc_vld is used by the commit stage to check
     // if current instruction is outputing a valid current PC
     //   to guarante the commit to flush pipeline safely, this
@@ -785,11 +785,11 @@ module e203_exu_alu(
               // Otherwise, just use the i_pc_vld
                               i_pc_vld;
 
-  assign cmt_o_misalgn     = (o_sel_agu & agu_o_cmt_misalgn) 
+  assign cmt_o_misalgn     = (o_sel_agu & agu_o_cmt_misalgn)
                            ;
-  assign cmt_o_ld          = (o_sel_agu & agu_o_cmt_ld)      
+  assign cmt_o_ld          = (o_sel_agu & agu_o_cmt_ld)
                            ;
-  assign cmt_o_badaddr     = ({`E203_ADDR_SIZE{o_sel_agu}} & agu_o_cmt_badaddr)  
+  assign cmt_o_badaddr     = ({`E203_ADDR_SIZE{o_sel_agu}} & agu_o_cmt_badaddr)
                            ;
   assign cmt_o_buserr      = o_sel_agu & agu_o_cmt_buserr;
   assign cmt_o_stamo       = o_sel_agu & agu_o_cmt_stamo ;
@@ -810,7 +810,7 @@ module e203_exu_alu(
                            | (o_sel_csr & csr_access_ilgl)
                         ;
 
-endmodule                                      
-                                               
-                                               
-                                               
+endmodule
+
+
+

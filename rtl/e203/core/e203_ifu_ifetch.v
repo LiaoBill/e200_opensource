@@ -1,21 +1,21 @@
- /*                                                                      
- Copyright 2017 Silicon Integrated Microelectronics, Inc.                
-                                                                         
- Licensed under the Apache License, Version 2.0 (the "License");         
- you may not use this file except in compliance with the License.        
- You may obtain a copy of the License at                                 
-                                                                         
-     http://www.apache.org/licenses/LICENSE-2.0                          
-                                                                         
-  Unless required by applicable law or agreed to in writing, software    
- distributed under the License is distributed on an "AS IS" BASIS,       
+ /*
+ Copyright 2017 Silicon Integrated Microelectronics, Inc.
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- See the License for the specific language governing permissions and     
- limitations under the License.                                          
- */                                                                      
-                                                                         
-                                                                         
-                                                                         
+ See the License for the specific language governing permissions and
+ limitations under the License.
+ */
+
+
+
 //=====================================================================
 //--        _______   ___
 //--       (   ____/ /__/
@@ -33,11 +33,12 @@
 // ====================================================================
 `include "e203_defines.v"
 
+// 包含 PC生成 的fetch模块
 module e203_ifu_ifetch(
   output[`E203_PC_SIZE-1:0] inspect_pc,
 
 
-  input  [`E203_PC_SIZE-1:0] pc_rtvec,  
+  input  [`E203_PC_SIZE-1:0] pc_rtvec,
   //////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////
   // Fetch Interface to memory system, internal protocol
@@ -46,7 +47,7 @@ module e203_ifu_ifetch(
   input  ifu_req_ready, // Handshake ready
             // Note: the req-addr can be unaligned with the length indicated
             //       by req_len signal.
-            //       The targetd (ITCM, ICache or Sys-MEM) ctrl modules 
+            //       The targetd (ITCM, ICache or Sys-MEM) ctrl modules
             //       will handle the unalign cases and split-and-merge works
   output [`E203_PC_SIZE-1:0] ifu_req_pc, // Fetch PC
   output ifu_req_seq, // This request is a sequential instruction fetch
@@ -54,12 +55,12 @@ module e203_ifu_ifetch(
   output [`E203_PC_SIZE-1:0] ifu_req_last_pc, // The last accessed
                                            // PC address (i.e., pc_r)
   //    * IFetch RSP channel
-  input  ifu_rsp_valid, // Response valid 
+  input  ifu_rsp_valid, // Response valid
   output ifu_rsp_ready, // Response ready
   input  ifu_rsp_err,   // Response error
             // Note: the RSP channel always return a valid instruction
             //   fetched from the fetching start PC address.
-            //   The targetd (ITCM, ICache or Sys-MEM) ctrl modules 
+            //   The targetd (ITCM, ICache or Sys-MEM) ctrl modules
             //   will handle the unalign cases and split-and-merge works
   //input  ifu_rsp_replay,
   input  [`E203_INSTR_SIZE-1:0] ifu_rsp_instr, // Response instruction
@@ -80,7 +81,7 @@ module e203_ifu_ifetch(
   //预测分支是否跳转
   output ifu_o_prdt_taken,               // The Bxx is predicted as taken
   //取指的时候是否有未对齐错误
-  output ifu_o_misalgn,                  // The fetch misalign 
+  output ifu_o_misalgn,                  // The fetch misalign
   //取指的时候是否有总线错误
   output ifu_o_buserr,                   // The fetch bus error
   output ifu_o_muldiv_b2b,               // The mul/div back2back case
@@ -94,16 +95,16 @@ module e203_ifu_ifetch(
   //流水线冲刷请求
   input   pipe_flush_req,
   //流水线冲刷的操作数1
-  input   [`E203_PC_SIZE-1:0] pipe_flush_add_op1,  
+  input   [`E203_PC_SIZE-1:0] pipe_flush_add_op1,
   //流水线冲刷的操作数2
   input   [`E203_PC_SIZE-1:0] pipe_flush_add_op2,
   `ifdef E203_TIMING_BOOST//}
-  input   [`E203_PC_SIZE-1:0] pipe_flush_pc,  
+  input   [`E203_PC_SIZE-1:0] pipe_flush_pc,
   `endif//}
 
-      
+
   // The halt request come from other commit stage
-  //   If the ifu_halt_req is asserting, then IFU will stop fetching new 
+  //   If the ifu_halt_req is asserting, then IFU will stop fetching new
   //     instructions and after the oustanding transactions are completed,
   //     asserting the ifu_halt_ack as the response.
   //   The IFU will resume fetching only after the ifu_halt_req is deasserted
@@ -136,20 +137,21 @@ module e203_ifu_ifetch(
   //hsked: handshaked
   wire ifu_req_hsked  = (ifu_req_valid & ifu_req_ready) ;
   wire ifu_rsp_hsked  = (ifu_rsp_valid & ifu_rsp_ready) ;
+  // handshaked with exu--> dispatch
   wire ifu_ir_o_hsked = (ifu_o_valid & ifu_o_ready) ;
   wire pipe_flush_hsked = pipe_flush_req & pipe_flush_ack;
 
-  
+
  // The rst_flag is the synced version of rst_n
- //    * rst_n is asserted 
+ //    * rst_n is asserted
  // The rst_flag will be clear when
- //    * rst_n is de-asserted 
+ //    * rst_n is de-asserted
   wire reset_flag_r;
   sirv_gnrl_dffrs #(1) reset_flag_dffrs (1'b0, reset_flag_r, clk, rst_n);
  //
- // The reset_req valid is set when 
+ // The reset_req valid is set when
  //    * Currently reset_flag is asserting
- // The reset_req valid is clear when 
+ // The reset_req valid is clear when
  //    * Currently reset_req is asserting
  //    * Currently the flush can be accepted by IFU
   wire reset_req_r;
@@ -182,7 +184,7 @@ module e203_ifu_ifetch(
      //        there is no oustanding transactions
   wire ifu_no_outs;
   assign halt_ack_set = ifu_halt_req & (~halt_ack_r) & ifu_no_outs;
-     // The halt_ack_r valid is cleared when 
+     // The halt_ack_r valid is cleared when
      //    * Currently halt_ack is asserting
      //    * Currently halt_req is de-asserting
   assign halt_ack_clr = halt_ack_r & (~ifu_halt_req);
@@ -200,9 +202,9 @@ module e203_ifu_ifetch(
   // The flush ack signal generation
    //
    //   Ideally the flush is acked when the ifetch interface is ready
-   //     or there is rsponse valid 
+   //     or there is rsponse valid
    //   But to cut the comb loop between EXU and IFU, we always accept
-   //     the flush, when it is not really acknowledged, we use a 
+   //     the flush, when it is not really acknowledged, we use a
    //     delayed flush indication to remember this flush
    //   Note: Even if there is a delayed flush pending there, we
    //     still can accept new flush request
@@ -218,7 +220,7 @@ module e203_ifu_ifetch(
       //        is not ready to accept new fetch request
    wire dly_flush_r;
    assign dly_flush_set = pipe_flush_req & (~ifu_req_hsked);
-      // The dly_flush_r valid is cleared when 
+      // The dly_flush_r valid is cleared when
       //    * The delayed flush is issued
    assign dly_flush_clr = dly_flush_r & ifu_req_hsked;
    assign dly_flush_ena = dly_flush_set | dly_flush_clr;
@@ -247,15 +249,16 @@ module e203_ifu_ifetch(
   wire ir_pc_vld_nxt;
 
 
-     // The ir valid is set when there is new instruction fetched *and* 
-     //   no flush happening 
+     // The ir valid is set when there is new instruction fetched *and*
+     //   no flush happening
   wire ifu_rsp_need_replay;
   wire pc_newpend_r;
   wire ifu_ir_i_ready;
   assign ir_valid_set  = ifu_rsp_hsked & (~pipe_flush_req_real) & (~ifu_rsp_need_replay);
   assign ir_pc_vld_set = pc_newpend_r & ifu_ir_i_ready & (~pipe_flush_req_real) & (~ifu_rsp_need_replay);
      // The ir valid is cleared when it is accepted by EXU stage *or*
-     //   the flush happening 
+     //   the flush happening
+  //表示指令已经提交给了exu的dispatch，得到了clr true, 表示我们可以继续fetch了
   assign ir_valid_clr  = ifu_ir_o_hsked | (pipe_flush_hsked & ir_valid_r);
   assign ir_pc_vld_clr = ir_valid_clr;
 
@@ -276,13 +279,13 @@ module e203_ifu_ifetch(
   wire ifu_err_r;
   sirv_gnrl_dfflr #(1) ifu_err_dfflr(ir_valid_set, ifu_err_nxt, ifu_err_r, clk, rst_n);
   //分支预测的结果(是否跳转)
-  wire prdt_taken;  
+  wire prdt_taken;
   wire ifu_prdt_taken_r;
   sirv_gnrl_dfflr #(1) ifu_prdt_taken_dfflr (ir_valid_set, prdt_taken, ifu_prdt_taken_r, clk, rst_n);
   wire ifu_muldiv_b2b_nxt;
   wire ifu_muldiv_b2b_r;
   sirv_gnrl_dfflr #(1) ir_muldiv_b2b_dfflr (ir_valid_set, ifu_muldiv_b2b_nxt, ifu_muldiv_b2b_r, clk, rst_n);
-     //To save power the H-16bits only loaded when it is 32bits length instru 
+     //To save power the H-16bits only loaded when it is 32bits length instru
   wire [`E203_INSTR_SIZE-1:0] ifu_ir_r;// The instruction register
   //mini-decoder解码的是32位指令还是16位指令
   wire minidec_rv32;
@@ -333,7 +336,7 @@ module e203_ifu_ifetch(
   assign ifu_o_pc  = ifu_pc_r;
     // Instruction fetch misaligned exceptions are not possible on machines that support extensions
     // with 16-bit aligned instructions, such as the compressed instruction set extension, C.
-  assign ifu_o_misalgn = 1'b0;// Never happen in RV32C configuration 
+  assign ifu_o_misalgn = 1'b0;// Never happen in RV32C configuration
   assign ifu_o_buserr  = ifu_err_r;
   //输出的rs1序号等于输入的rs1序号
   assign ifu_o_rs1idx = ir_rs1idx_r;
@@ -364,14 +367,14 @@ module e203_ifu_ifetch(
   //////////////////////////////////////////////////////////////
   // MULDIV BACK2BACK Fusing
   // To detect the sequence of MULH[[S]U] rdh, rs1, rs2;    MUL rdl, rs1, rs2
-  // To detect the sequence of     DIV[U] rdq, rs1, rs2; REM[U] rdr, rs1, rs2  
+  // To detect the sequence of     DIV[U] rdq, rs1, rs2; REM[U] rdr, rs1, rs2
   //mini-decoder解码得到的结果是不是乘除法
   wire minidec_mul ;
   wire minidec_div ;
   wire minidec_rem ;
   wire minidec_divu;
   wire minidec_remu;
-  assign ifu_muldiv_b2b_nxt = 
+  assign ifu_muldiv_b2b_nxt =
       (
           // For multiplicaiton, only the MUL instruction following
           //    MULH/MULHU/MULSU can be treated as back2back
@@ -409,7 +412,7 @@ module e203_ifu_ifetch(
   //跳转指令的立即数
   wire [`E203_XLEN-1:0] minidec_bjp_imm;
 
-  // The mini-decoder to check instruciton length and branch type 
+  // The mini-decoder to check instruciton length and branch type
   e203_ifu_minidec u_e203_ifu_minidec (
       .instr       (ifu_ir_nxt         ),
 
@@ -442,7 +445,7 @@ module e203_ifu_ifetch(
   //bpu是否需要等待
   wire bpu_wait;
   //bpu输出的pc预测操作数1
-  wire [`E203_PC_SIZE-1:0] prdt_pc_add_op1;  
+  wire [`E203_PC_SIZE-1:0] prdt_pc_add_op1;
   //bpu输出的pc预测操作数2
   wire [`E203_PC_SIZE-1:0] prdt_pc_add_op2;
 
@@ -450,7 +453,7 @@ module e203_ifu_ifetch(
   e203_ifu_litebpu u_e203_ifu_litebpu(
 
     .pc                       (pc_r),
-                              
+
     .dec_jal                  (minidec_jal  ),
     .dec_jalr                 (minidec_jalr ),
     .dec_bxx                  (minidec_bxx  ),
@@ -459,7 +462,7 @@ module e203_ifu_ifetch(
 
     .dec_i_valid              (ifu_rsp_valid),
     .ir_valid_clr             (ir_valid_clr),
-                
+
     .oitf_empty               (oitf_empty),
     .ir_empty                 (ir_empty  ),
     .ir_rs1en                 (ir_rs1en  ),
@@ -468,11 +471,11 @@ module e203_ifu_ifetch(
     .jalr_rs1idx_cam_irrdidx  (jalr_rs1idx_cam_irrdidx),
 
     //bpu_wait输出
-    .bpu_wait                 (bpu_wait       ),  
+    .bpu_wait                 (bpu_wait       ),
     //bpu预测的是否跳转
-    .prdt_taken               (prdt_taken     ),  
+    .prdt_taken               (prdt_taken     ),
     //bpu输出的pc预测操作数1
-    .prdt_pc_add_op1          (prdt_pc_add_op1),  
+    .prdt_pc_add_op1          (prdt_pc_add_op1),
     //bpu输出的pc预测操作数2
     .prdt_pc_add_op2          (prdt_pc_add_op2),
 
@@ -481,7 +484,7 @@ module e203_ifu_ifetch(
     .rf2bpu_rs1               (rf2ifu_rs1   ),
 
     .clk                      (clk  ) ,
-    .rst_n                    (rst_n )                 
+    .rst_n                    (rst_n )
   );
 
   // If the instruciton is 32bits length, increament 4, otherwise 2
@@ -495,7 +498,7 @@ module e203_ifu_ifetch(
 
   wire ifetch_replay_req;
 
-  wire [`E203_PC_SIZE-1:0] pc_add_op1 = 
+  wire [`E203_PC_SIZE-1:0] pc_add_op1 =
                             `ifndef E203_TIMING_BOOST//}
                                pipe_flush_req  ? pipe_flush_add_op1 :
                                dly_pipe_flush_req  ? pc_r :
@@ -506,7 +509,7 @@ module e203_ifu_ifetch(
                                ifu_reset_req   ? pc_rtvec :
                                                  pc_r;
 
-  wire [`E203_PC_SIZE-1:0] pc_add_op2 =  
+  wire [`E203_PC_SIZE-1:0] pc_add_op2 =
                             `ifndef E203_TIMING_BOOST//}
                                pipe_flush_req  ? pipe_flush_add_op2 :
                                dly_pipe_flush_req  ? `E203_PC_SIZE'b0 :
@@ -527,7 +530,7 @@ module e203_ifu_ifetch(
   `ifndef E203_TIMING_BOOST//}
   assign pc_nxt = {pc_nxt_pre[`E203_PC_SIZE-1:1],1'b0};
   `else//}{
-  assign pc_nxt = 
+  assign pc_nxt =
                pipe_flush_req ? {pipe_flush_pc[`E203_PC_SIZE-1:1],1'b0} :
                dly_pipe_flush_req ? {pc_r[`E203_PC_SIZE-1:1],1'b0} :
                {pc_nxt_pre[`E203_PC_SIZE-1:1],1'b0};
