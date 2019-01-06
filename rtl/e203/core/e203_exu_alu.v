@@ -164,13 +164,19 @@ module e203_exu_alu(
 
   //////////////////////////////////////////////////////////////
   // Dispatch to different sub-modules according to their types
-
+  // ifu exception operator//illegal，buserr???,misalign导致的异常的话，高电平
   wire ifu_excp_op = i_ilegl | i_buserr | i_misalgn;
+  // 没有异常ifu
+  // 普通的alu计算
   wire alu_op = (~ifu_excp_op) & (i_info[`E203_DECINFO_GRP] == `E203_DECINFO_GRP_ALU);
+  // load and store, 计算地址
   wire agu_op = (~ifu_excp_op) & (i_info[`E203_DECINFO_GRP] == `E203_DECINFO_GRP_AGU);
+  // branch jump prediction
   wire bjp_op = (~ifu_excp_op) & (i_info[`E203_DECINFO_GRP] == `E203_DECINFO_GRP_BJP);
+  // csr寄存器指令（control and status register）
   wire csr_op = (~ifu_excp_op) & (i_info[`E203_DECINFO_GRP] == `E203_DECINFO_GRP_CSR);
 `ifdef E203_SUPPORT_SHARE_MULDIV //{
+  // mul and div
   wire mdv_op = (~ifu_excp_op) & (i_info[`E203_DECINFO_GRP] == `E203_DECINFO_GRP_MULDIV);
 `endif//E203_SUPPORT_SHARE_MULDIV}
 
@@ -183,10 +189,12 @@ module e203_exu_alu(
 `ifdef E203_SUPPORT_SHARE_MULDIV //{
   wire mdv_i_valid = i_valid & mdv_op;
 `endif//E203_SUPPORT_SHARE_MULDIV}
-  wire agu_i_valid = i_valid & agu_op;
-  wire alu_i_valid = i_valid & alu_op;
-  wire bjp_i_valid = i_valid & bjp_op;
-  wire csr_i_valid = i_valid & csr_op;
+  // i valid 是一个input，来自dispatch输出的disp_alu_valid，代表没有任何数据冲突后，向alu发送的握手信号
+  // 这里分块
+  wire agu_i_valid = i_valid & agu_op; //如果是高电平就给agu, u_e203_exu_alu_lsuagu
+  wire alu_i_valid = i_valid & alu_op; //如果是...就给u_e203_exu_alu_rglr
+  wire bjp_i_valid = i_valid & bjp_op; // u_e203_exu_alu_bjp
+  wire csr_i_valid = i_valid & csr_op; // u_e203_exu_alu_csrctrl
   wire ifu_excp_i_valid = i_valid & ifu_excp_op;
 
 `ifdef E203_SUPPORT_SHARE_MULDIV //{
@@ -213,6 +221,18 @@ module e203_exu_alu(
   wire mdv_i_longpipe;
 `endif//E203_SUPPORT_SHARE_MULDIV}
 
+  // 在这边指定当前指令是否是longpipe， agu是address generation unit,地址生成模块
+  // 在lsuagu中被如是赋值assign agu_i_longpipe = agu_i_algnldst;, agu_i_longpipe 这个东西是lsuagu的是一个输出
+  // lsuagu中对agu_i_algnldst进行了如下处理：
+    // wire agu_i_algnldst = (agu_i_algnld | agu_i_algnst);
+    // 这两个东西又是：
+        // wire agu_i_algnld = (~agu_addr_unalgn) & agu_i_load
+        // wire agu_i_algnst = (~agu_addr_unalgn) & agu_i_store
+        // wire       agu_i_load    = agu_i_info [`E203_DECINFO_AGU_LOAD   ] & (~flush_block);
+        // wire       agu_i_store   = agu_i_info [`E203_DECINFO_AGU_STORE  ] & (~flush_block);
+        // 这agu_i_algnldst就是判断当前没有unalign并且要么是读或写，那么我就是agu_i_longpipe
+  // 如果没有定义share mul div,那么长指令就代表是agu指令，也就是LS指令
+  // 现在是开着的，所以如果是访问内存计算地址的agu指令或者是乘除法都算作是长指令
   assign i_longpipe = (agu_i_longpipe & agu_op)
                    `ifdef E203_SUPPORT_SHARE_MULDIV //{
                     | (mdv_i_longpipe & mdv_op)

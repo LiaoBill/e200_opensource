@@ -343,6 +343,7 @@ module e203_exu(
     .disp_i_rs2en        (dec_rs2en       ),
     .disp_i_rs1idx       (i_rs1idx      ),
     .disp_i_rs2idx       (i_rs2idx      ),
+    // input
     .disp_i_rdwen        (dec_rdwen       ),
     .disp_i_rdidx        (dec_rdidx       ),
     .disp_i_info         (dec_info        ),
@@ -376,6 +377,7 @@ module e203_exu(
 
     .disp_oitf_rs1en     (disp_oitf_rs1en),
     .disp_oitf_rs2en     (disp_oitf_rs2en),
+    // 永远是1位0, 但是如果用了FPU就是FPU的参数了，也就是说浮点数计算会用到三个操作数的使能控制
     .disp_oitf_rs3en     (disp_oitf_rs3en),
     .disp_oitf_rdwen     (disp_oitf_rdwen ),
     .disp_oitf_rs1idx    (disp_oitf_rs1idx),
@@ -407,9 +409,10 @@ module e203_exu(
   wire oitf_ret_rdwen;
   wire oitf_ret_rdfpu;
 
-
+  // oitf part
   e203_exu_oitf u_e203_exu_oitf(
     .dis_ready            (disp_oitf_ready),
+    // 也就是和alu握手完成并且通过alu计算确定是长指令了（现在只有乘除法和LS操作），才会ena, 这个wire直接从dispatch->alu拿结果->oitf这样接过来了
     .dis_ena              (disp_oitf_ena  ),
     .ret_ena              (oitf_ret_ena  ),
 
@@ -421,10 +424,34 @@ module e203_exu(
     .ret_rdfpu            (oitf_ret_rdfpu),
     .ret_pc               (oitf_ret_pc),
 
+    // dispatch部分传出来的使能
+    // dispatch对这些使能信号进行了如下计算：
+      // 如果没有定义fpu（我们是没有定义的）,就是disp_i_rs1en, 这些是dispatch模块的输入, 也是decode模块的输出，就代表是否是有这个操作数
+        // decode模块相关代码：{
+            //指令的rs1使能信号
+            // assign dec_rs1en = rv32 ? rv32_need_rs1 : (rv16_rs1en & (~(rv16_rs1idx == `E203_RFIDX_WIDTH'b0)));
+            // //指令的rs2使能信号
+            // assign dec_rs2en = rv32 ? rv32_need_rs2 : (rv16_rs2en & (~(rv16_rs2idx == `E203_RFIDX_WIDTH'b0)));
+            // //指令的rd使能信号
+            // assign dec_rdwen = rv32 ? rv32_need_rd  : (rv16_rden  & (~(rv16_rdidx  == `E203_RFIDX_WIDTH'b0)));
+        // }
+        // dispatch 模块相关代码{
+          // The operand 1/2 read-enable signals and indexes
+          // input  disp_i_rs1x0,
+          // input  disp_i_rs2x0,
+          // input  disp_i_rs1en,
+          // input  disp_i_rs2en,
+        // }
+      // assign disp_oitf_rs1en  = disp_i_fpu ? disp_i_fpu_rs1en : disp_i_rs1en;
+      // assign disp_oitf_rs2en  = disp_i_fpu ? disp_i_fpu_rs2en : disp_i_rs2en;
+      // assign disp_oitf_rs3en  = disp_i_fpu ? disp_i_fpu_rs3en : 1'b0;
+      // assign disp_oitf_rdwen  = disp_i_fpu ? disp_i_fpu_rdwen : disp_i_rdwen;
     .disp_i_rs1en         (disp_oitf_rs1en),
     .disp_i_rs2en         (disp_oitf_rs2en),
+    // 永远是1位0, 但是如果用了FPU就是FPU的参数了，也就是说浮点数计算会用到三个操作数的使能控制
     .disp_i_rs3en         (disp_oitf_rs3en),
     .disp_i_rdwen         (disp_oitf_rdwen ),
+
     .disp_i_rs1idx        (disp_oitf_rs1idx),
     .disp_i_rs2idx        (disp_oitf_rs2idx),
     .disp_i_rs3idx        (disp_oitf_rs3idx),

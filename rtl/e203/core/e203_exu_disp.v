@@ -69,6 +69,7 @@ module e203_exu_disp(
   output disp_o_alu_valid, 
   input  disp_o_alu_ready,
 
+  // alu 计算完是否是longpipe，具体计算过程在i_longpipe这个值的alu里面的赋值的地方
   input  disp_o_alu_longpipe,
 
   output [`E203_XLEN-1:0] disp_o_alu_rs1,
@@ -91,6 +92,7 @@ module e203_exu_disp(
   input  oitfrd_match_disprd,
   input  [`E203_ITAG_WIDTH-1:0] disp_oitf_ptr ,
 
+  // 也就是和alu握手完成并且通过alu计算确定是长指令了（现在只有乘除法和LS操作），才会ena
   output disp_oitf_ena,
   input  disp_oitf_ready,
 
@@ -250,6 +252,9 @@ module e203_exu_disp(
   
     // Why we use precise version of disp_longp here, because
     //   only when it is really dispatched as long pipe then allocate the OITF
+  // disp_alu_longp_real就是alu里面计算完成的i_longpipe的数值，也就是现在只有乘除法和LS操作
+  // 并且alu是ready的，也是我valid的，也就是确定了是要传给alu进行执行的状态
+  // 也就是和alu握手完成并且通过alu计算确定是长指令了（现在只有乘除法和LS操作），才会ena
   assign disp_oitf_ena = disp_o_alu_valid & disp_o_alu_ready & disp_alu_longp_real;
 
   assign disp_o_alu_imm  = disp_i_imm;
@@ -260,7 +265,7 @@ module e203_exu_disp(
   assign disp_o_alu_ilegl  = disp_i_ilegl  ;
 
 
-
+  // no FPU
   `ifndef E203_HAS_FPU//{
   wire disp_i_fpu       = 1'b0;
   wire disp_i_fpu_rs1en = 1'b0;
@@ -281,6 +286,7 @@ module e203_exu_disp(
   assign disp_oitf_rs3fpu = disp_i_fpu ? (disp_i_fpu_rs3en & disp_i_fpu_rs3fpu) : 1'b0;
   assign disp_oitf_rdfpu  = disp_i_fpu ? (disp_i_fpu_rdwen & disp_i_fpu_rdfpu ) : 1'b0;
 
+  // output的oitf rs1,2,3,rd的使能
   assign disp_oitf_rs1en  = disp_i_fpu ? disp_i_fpu_rs1en : disp_i_rs1en;
   assign disp_oitf_rs2en  = disp_i_fpu ? disp_i_fpu_rs2en : disp_i_rs2en;
   assign disp_oitf_rs3en  = disp_i_fpu ? disp_i_fpu_rs3en : 1'b0;

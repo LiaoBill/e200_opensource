@@ -95,6 +95,7 @@
 
 `define E203_CFG_HAS_ECC
 `define E203_CFG_HAS_EAI
+// 如果去掉这个就没有mul div了
 `define E203_CFG_SUPPORT_SHARE_MULDIV
 `define E203_CFG_SUPPORT_AMO
 `define E203_CFG_DTCM_ADDR_WIDTH 16
