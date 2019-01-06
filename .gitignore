@@ -16,3 +16,4 @@ vsim/irq.rc
 verilator/obj
 verilator/results
 verilator/*.vcd
+verilator/*.verilog
