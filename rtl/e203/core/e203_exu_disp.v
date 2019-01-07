@@ -88,15 +88,18 @@ module e203_exu_disp(
 
   //////////////////////////////////////////////////////////////
   // Dispatch to OITF
+  //oitf中的某条指令和源操作数match，说明有RAW依赖
   input  oitfrd_match_disprs1,
   input  oitfrd_match_disprs2,
   input  oitfrd_match_disprs3,
+  //oitf中的某条指令和目标操作数match，说明有WAW依赖
   input  oitfrd_match_disprd,
   // 由OITF传递过来的队列尾部ITAG
   input  [`E203_ITAG_WIDTH-1:0] disp_oitf_ptr ,
 
   // 也就是和alu握手完成并且通过alu计算确定是长指令了（现在只有乘除法和LS操作），才会ena
   output disp_oitf_ena,
+  //oitf是否ready，也就是oitf是不是没有满
   input  disp_oitf_ready,
 
   output disp_oitf_rs1fpu,
@@ -136,8 +139,10 @@ module e203_exu_disp(
   //              `endif//E203_SUPPORT_SHARE_MULDIV}
   //               | (disp_i_info_grp == `E203_DECINFO_GRP_AGU);
 
+  //是否为CSR类型指令
   wire disp_csr = (disp_i_info_grp == `E203_DECINFO_GRP_CSR); 
 
+  //是否为AGU类型指令
   wire disp_alu_longp_prdt = (disp_i_info_grp == `E203_DECINFO_GRP_AGU)  
                              ;
 
@@ -233,13 +238,16 @@ module e203_exu_disp(
                //// & ((disp_alu & disp_o_alu_longpipe) ? disp_oitf_ready : 1'b1);
                // To cut the critical timing  path from longpipe signal
                // we always assume the LSU will need oitf ready
+                 //disp_oitf_ready: oitf是否ready，也就是oitf是不是没有满
                & (disp_alu_longp_prdt ? disp_oitf_ready : 1'b1);
 
   assign disp_i_valid_pos = disp_condition & disp_i_valid; 
   assign disp_i_ready     = disp_condition & disp_i_ready_pos; 
 
 
+  //如果rs1为x0，则disp_i_rs1_msked一定为全0
   wire [`E203_XLEN-1:0] disp_i_rs1_msked = disp_i_rs1 & {`E203_XLEN{~disp_i_rs1x0}};
+  //如果rs2为x0，则disp_i_rs2_msked一定为全0
   wire [`E203_XLEN-1:0] disp_i_rs2_msked = disp_i_rs2 & {`E203_XLEN{~disp_i_rs2x0}};
     // Since we always dispatch any instructions into ALU, so we dont need to gate ops here
   //assign disp_o_alu_rs1   = {`E203_XLEN{disp_alu}} & disp_i_rs1_msked;
