@@ -156,6 +156,8 @@ module e203_exu_alu(
   input                          agu_icb_rsp_excl_ok,
   input  [`E203_XLEN-1:0]        agu_icb_rsp_rdata,
 
+  // --------- add/modify/delete code ---------
+  output x_csr_op,
 
 
   input  clk,
@@ -186,6 +188,9 @@ module e203_exu_alu(
   // mul and div
   wire mdv_op = (~ifu_excp_op) & (i_info[`E203_DECINFO_GRP] == `E203_DECINFO_GRP_MULDIV);
 `endif//E203_SUPPORT_SHARE_MULDIV}
+
+// --------- add/modify/delete code ---------
+  assign x_csr_op = csr_op;
 
   // The ALU incoming instruction may go to several different targets:
   //   * The ALUDATAPATH if it is a regular ALU instructions

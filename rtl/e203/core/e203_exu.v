@@ -530,6 +530,8 @@ module e203_exu(
 
   wire mdv_nob2b;
 
+  // --------- add/modify/delete code ---------
+  wire x_csr_op;
 
   e203_exu_alu u_e203_exu_alu(
 
@@ -629,7 +631,8 @@ module e203_exu(
     .agu_icb_rsp_rdata   (agu_icb_rsp_rdata),
 
 
-
+    // --------- add/modify/delete code ---------
+    .x_csr_op (x_csr_op),
 
     .mdv_nob2b         (mdv_nob2b),
 
@@ -639,6 +642,9 @@ module e203_exu(
 
   //////////////////////////////////////////////////////////////
   // Instantiate the Long-pipe Write-Back
+  // --------- add/modify/delete code ---------
+  wire longpwbk_lsu_sel;
+  // --------- add/modify/delete code ---------
   wire longp_wbck_o_valid;
   wire longp_wbck_o_ready;
   wire [`E203_FLEN-1:0] longp_wbck_o_wdat;
@@ -693,7 +699,7 @@ module e203_exu(
     .oitf_ret_ena        (oitf_ret_ena  ),
 
 
-
+    .longpwbk_lsu_sel (longpwbk_lsu_sel),
 
     .clk                 (clk          ),
     .rst_n               (rst_n        )
@@ -711,6 +717,8 @@ module e203_exu(
   // --------- add/modify/delete code ---------
   e203_exu_aluwbck u_e203_exu_aluwbck(
 
+    .longpwbk_lsu_sel (longpwbk_lsu_sel),
+    .csr_op (x_csr_op),
     .x_alu_wbck_i_valid   (alu_wbck_o_valid ),
     .x_alu_wbck_i_ready   (alu_wbck_o_ready ),
     .x_alu_wbck_i_wdat    (alu_wbck_o_wdat  ),
