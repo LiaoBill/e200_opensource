@@ -279,9 +279,9 @@ module e203_exu_disp(
   // disp_o_alu_valid 必须需要disp_condition为真
   // 可以加入oitf的一定是可以发射的，所以这边很好得控制了oitf不小心多周期重复写的问题，如果不可以加入，那下周期传入的那个不可加入的命令也会将ena设置为false
   // --------- add/modify/delete code ---------
-  wire x_disp_i_rdwen = disp_i_rdwen;
+  // wire x_disp_i_rdwen = disp_i_rdwen;
   // the instruction have to need read to put into oitf
-  assign disp_oitf_ena = disp_o_alu_valid & disp_o_alu_ready & disp_alu_longp_real & x_disp_i_rdwen;
+  assign disp_oitf_ena = disp_o_alu_valid & disp_o_alu_ready & disp_alu_longp_real;
   // --------- add/modify/delete code ---------
 
   assign disp_o_alu_imm  = disp_i_imm;

@@ -78,6 +78,8 @@ module e203_exu_longpwbck(
   input  oitf_ret_rdwen,   
   input  oitf_ret_rdfpu,   
   output oitf_ret_ena,
+  // --------- add/modify/delete code ---------
+  output longpwbk_lsu_sel,
   
   input  clk,
   input  rst_n
@@ -91,6 +93,9 @@ module e203_exu_longpwbck(
   // 也就是说我们在ALU这里加一个判断就好了
   wire wbck_ready4lsu = (lsu_wbck_i_itag == oitf_ret_ptr) & (~oitf_empty);
   wire wbck_sel_lsu = lsu_wbck_i_valid & wbck_ready4lsu;
+
+  // --------- add/modify/delete code ---------
+  assign longpwbk_lsu_sel = wbck_sel_lsu;
 
   //assign longp_excp_o_ld   = wbck_sel_lsu & lsu_cmt_i_ld;
   //assign longp_excp_o_st   = wbck_sel_lsu & lsu_cmt_i_st;

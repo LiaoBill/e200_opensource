@@ -11,6 +11,8 @@ module e203_exu_aluwbck(
   //////////////////////////////////////////////////////////////
   // alu 输入部分 -- input
   // Handshake valid 写回握手请求信号
+  input longpwbk_lsu_sel,
+  input  csr_op,
   input  x_alu_wbck_i_valid,
   // Handshake ready 写回握手反馈信号
   output x_alu_wbck_i_ready,
@@ -77,6 +79,24 @@ module e203_exu_aluwbck(
   input  rst_n
   );
 
+// --------- add/modify/delete code ---------
+  wire reg_csr_op;
+  wire reg_x_alu_wbck_i_valid;
+  wire  [`E203_XLEN-1:0] reg_x_alu_wbck_i_wdat;
+  wire [`E203_RFIDX_WIDTH-1:0] reg_x_alu_wbck_i_rdidx;
+  wire  [`E203_ITAG_WIDTH -1:0] reg_x_alu_wbck_i_itag;
+  wire whether_fetch_new;
+
+  assign whether_fetch_new = wbck_i_valid | oitf_empty;
+
+  sirv_gnrl_dfflr #(1) trigger_reg_csr_op (whether_fetch_new, csr_op, reg_csr_op, clk, rst_n);
+  sirv_gnrl_dfflr #(1) trigger_reg_x_alu_wbck_i_valid (whether_fetch_new, x_alu_wbck_i_valid, reg_x_alu_wbck_i_valid, clk, rst_n);
+  sirv_gnrl_dfflr #(`E203_XLEN) trigger_reg_x_alu_wbck_i_wdat (whether_fetch_new, x_alu_wbck_i_wdat, reg_x_alu_wbck_i_wdat, clk, rst_n);
+  sirv_gnrl_dfflr #(`E203_RFIDX_WIDTH) trigger_reg_x_alu_wbck_i_rdidx (whether_fetch_new, x_alu_wbck_i_rdidx, reg_x_alu_wbck_i_rdidx, clk, rst_n);
+  sirv_gnrl_dfflr #(`E203_ITAG_WIDTH) trigger_reg_x_alu_wbck_i_itag (whether_fetch_new, x_alu_wbck_i_itag, reg_x_alu_wbck_i_itag, clk, rst_n);
+// --------- add/modify/delete code ---------
+
+
   // The Long-pipe instruction can write-back only when it's itag 
   //   is same as the itag of toppest entry of OITF
   // oitf不能是空的，不然没东西删除也没必要删除
@@ -87,8 +107,9 @@ module e203_exu_aluwbck(
   // --------- add/modify/delete code ---------模仿上方的写法即可
   // 为了测试先设置为永真
   // wire wbck_ready4alu = (x_alu_wbck_i_itag == oitf_ret_ptr) & (~oitf_empty);
-  wire wbck_ready4alu = 1'b1 | (x_alu_wbck_i_itag == oitf_ret_ptr) & (~oitf_empty);
-  wire wbck_sel_alu = x_alu_wbck_i_valid & wbck_ready4alu;
+  // not csr
+  wire wbck_ready4alu = (reg_x_alu_wbck_i_itag == oitf_ret_ptr) & (~oitf_empty) | oitf_empty;
+  wire wbck_sel_alu = reg_x_alu_wbck_i_valid & wbck_ready4alu;
 
   // 异常处理不需要
   //assign longp_excp_o_ld   = wbck_sel_lsu & lsu_cmt_i_ld;
@@ -131,11 +152,11 @@ module e203_exu_aluwbck(
 
   // assign wbck_i_valid = ({1{wbck_sel_lsu}} & lsu_wbck_i_valid) 
   // --------- add/modify/delete code ---------
-  assign wbck_i_valid = ({1{wbck_sel_alu}} & x_alu_wbck_i_valid);
+  assign wbck_i_valid = ({1{wbck_sel_alu}} & reg_x_alu_wbck_i_valid);
 
 
   // `ifdef E203_FLEN_IS_32 //{
-  wire [`E203_XLEN-1:0] alu_wbck_i_wdat_exd = x_alu_wbck_i_wdat;
+  wire [`E203_XLEN-1:0] alu_wbck_i_wdat_exd = reg_x_alu_wbck_i_wdat;
   // `else//}{
   // wire [`E203_XLEN-1:0] lsu_wbck_i_wdat_exd = {{`E203_XLEN-`E203_XLEN{1'b0}},lsu_wbck_i_wdat};
   // `endif//}
@@ -147,7 +168,7 @@ module e203_exu_aluwbck(
   //                        ;
 
   // assign wbck_i_pc    = oitf_ret_pc;
-  assign wbck_i_rdidx = x_alu_wbck_i_rdidx;
+  assign wbck_i_rdidx = reg_x_alu_wbck_i_rdidx;
   // assign wbck_i_rdwen = oitf_ret_rdwen;
   // assign wbck_i_rdfpu = oitf_ret_rdfpu;
 
@@ -187,7 +208,7 @@ module e203_exu_aluwbck(
   // 为了测试牺牲一下, 写回了才会ready，才去除oitf中的数值
   // assign oitf_ret_ena = wbck_i_valid & wbck_i_ready;
   // 代表向后说我要写回并且后面回复说已经写好了，才将ret_ena设置为true，也就是删掉当前项目
-  assign oitf_ret_ena = wbck_i_valid & wbck_i_ready;
+  assign oitf_ret_ena = wbck_i_valid & wbck_i_ready & (~reg_csr_op) | longpwbk_lsu_sel;
 
 endmodule                                      
                                                
