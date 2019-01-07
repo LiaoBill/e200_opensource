@@ -155,6 +155,8 @@ module e203_exu_alu(
   input                          agu_icb_rsp_err  , // Response error
   input                          agu_icb_rsp_excl_ok,
   input  [`E203_XLEN-1:0]        agu_icb_rsp_rdata,
+  // --------- add/modify/delete code ---------
+  input is_rd_32_x0,
 
   // --------- add/modify/delete code ---------
   output x_csr_op,
@@ -245,9 +247,10 @@ module e203_exu_alu(
         // 这agu_i_algnldst就是判断当前没有unalign并且要么是读或写，那么我就是agu_i_longpipe
   // 如果没有定义share mul div,那么长指令就代表是agu指令，也就是LS指令
   // 现在是开着的，所以如果是访问内存计算地址的agu指令或者是乘除法都算作是长指令
+  wire alu_i_longpipe;
   assign i_longpipe = (agu_i_longpipe & agu_op)
   // --------- add/modify/delete code ---------
-                    | (alu_op) // put all alu operation first, into oitf (later will include csr operation)
+                    | (alu_i_longpipe & alu_op & (~is_rd_32_x0)) // put all alu operation first, into oitf (later will include csr operation), but not nop
   // --------- add/modify/delete code ---------
                    `ifdef E203_SUPPORT_SHARE_MULDIV //{
                     | (mdv_i_longpipe & mdv_op)
@@ -560,6 +563,7 @@ module e203_exu_alu(
       .alu_req_alu_op1     (alu_req_alu_op1       ),
       .alu_req_alu_op2     (alu_req_alu_op2       ),
       .alu_req_alu_res     (alu_req_alu_res       ),
+      .alu_i_longpipe  (alu_i_longpipe),
 
       .clk                 (clk           ),
       .rst_n               (rst_n         )

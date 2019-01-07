@@ -108,9 +108,14 @@ module e203_exu_decode(
   //jalr的寄存器地址
   output [`E203_RFIDX_WIDTH-1:0] dec_jalr_rs1idx,
   //跳转指令的立即数
-  output [`E203_XLEN-1:0] dec_bjp_imm
+  output [`E203_XLEN-1:0] dec_bjp_imm,
+
+  // --------- add/modify/delete code ---------
+  output is_rd_32_x0
   );
 
+// --------- add/modify/delete code ---------
+assign is_rd_32_x0 = rv32_rd_x0;
 
 
   //32位指令使用全部32位输入

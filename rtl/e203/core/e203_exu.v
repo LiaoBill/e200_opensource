@@ -234,6 +234,7 @@ module e203_exu(
   wire dec_misalgn;
   wire dec_buserr;
   wire dec_ilegl;
+  wire is_rd_32_x0;
 
 
   //////////////////////////////////////////////////////////////
@@ -279,7 +280,8 @@ module e203_exu(
     .dec_ilegl  (dec_ilegl),
     .dec_rdidx (dec_rdidx),
     .dec_pc    (dec_pc),
-    .dec_imm   (dec_imm)
+    .dec_imm   (dec_imm),
+    .is_rd_32_x0 (is_rd_32_x0)
   );
 
   //////////////////////////////////////////////////////////////
@@ -397,6 +399,7 @@ module e203_exu(
     .oitfrd_match_disprs2(oitfrd_match_disprs2),
     .oitfrd_match_disprs3(oitfrd_match_disprs3),
     .oitfrd_match_disprd (oitfrd_match_disprd ),
+    
 
     .clk                 (clk  ),
     .rst_n               (rst_n)
@@ -629,6 +632,7 @@ module e203_exu(
     .agu_icb_rsp_err     (agu_icb_rsp_err   ),
     .agu_icb_rsp_excl_ok (agu_icb_rsp_excl_ok),
     .agu_icb_rsp_rdata   (agu_icb_rsp_rdata),
+    .is_rd_32_x0 (is_rd_32_x0),
 
 
     // --------- add/modify/delete code ---------
@@ -696,7 +700,7 @@ module e203_exu(
     .oitf_ret_pc         (oitf_ret_pc),
     .oitf_empty          (oitf_empty    ),
     .oitf_ret_ptr        (oitf_ret_ptr  ),
-    .oitf_ret_ena        (oitf_ret_ena  ),
+    .oitf_ret_ena        (long_oitf_ret_ena  ),
 
 
     .longpwbk_lsu_sel (longpwbk_lsu_sel),
@@ -705,7 +709,10 @@ module e203_exu(
     .rst_n               (rst_n        )
   );
 
-
+// --------- add/modify/delete code ---------
+  wire long_oitf_ret_ena;
+  wire alu_oitf_ret_ena;
+  assign oitf_ret_ena = long_oitf_ret_ena | alu_oitf_ret_ena;
   //////////////////////////////////////////////////////////////
   
   // --------- add/modify/delete code ---------
@@ -739,7 +746,7 @@ module e203_exu(
 
     // .oitf_ret_rdwen      (oitf_ret_rdwen),
     // // 是否oitf淦出来一个值
-    .oitf_ret_ena        (oitf_ret_ena  ),
+    .oitf_ret_ena        (alu_oitf_ret_ena  ),
 
     .clk                 (clk          ),
     .rst_n               (rst_n        )

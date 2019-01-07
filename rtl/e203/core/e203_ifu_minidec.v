@@ -138,7 +138,8 @@ module e203_ifu_minidec(
   //寄存器无条件跳转指令的寄存器序号
   .dec_jalr_rs1idx(dec_jalr_rs1idx),
   //跳转的立即数
-  .dec_bjp_imm    (dec_bjp_imm    )  
+  .dec_bjp_imm    (dec_bjp_imm    ),
+  .is_rd_32_x0 ()
   );
 
 

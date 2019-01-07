@@ -458,8 +458,8 @@ module e203_core(
   wire commit_trap;
   wire excp_active;
 
-  e203_exu_with_decoder u_e203_exu(
-  // e203_exu u_e203_exu(
+  // e203_exu_with_decoder u_e203_exu(
+  e203_exu u_e203_exu(
 
   `ifdef E203_HAS_CSR_EAI//{
     .eai_csr_valid (eai_csr_valid),

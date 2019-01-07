@@ -87,7 +87,7 @@ module e203_exu_aluwbck(
   wire  [`E203_ITAG_WIDTH -1:0] reg_x_alu_wbck_i_itag;
   wire whether_fetch_new;
 
-  assign whether_fetch_new = wbck_i_valid | oitf_empty;
+  assign whether_fetch_new = (~oitf_empty) & (reg_x_alu_wbck_i_itag == oitf_ret_ptr) | oitf_empty;
 
   sirv_gnrl_dfflr #(1) trigger_reg_csr_op (whether_fetch_new, csr_op, reg_csr_op, clk, rst_n);
   sirv_gnrl_dfflr #(1) trigger_reg_x_alu_wbck_i_valid (whether_fetch_new, x_alu_wbck_i_valid, reg_x_alu_wbck_i_valid, clk, rst_n);
@@ -208,7 +208,7 @@ module e203_exu_aluwbck(
   // 为了测试牺牲一下, 写回了才会ready，才去除oitf中的数值
   // assign oitf_ret_ena = wbck_i_valid & wbck_i_ready;
   // 代表向后说我要写回并且后面回复说已经写好了，才将ret_ena设置为true，也就是删掉当前项目
-  assign oitf_ret_ena = wbck_i_valid & wbck_i_ready & (~reg_csr_op) | longpwbk_lsu_sel;
+  assign oitf_ret_ena = wbck_i_valid & wbck_i_ready & (~reg_csr_op);
 
 endmodule                                      
                                                

@@ -84,6 +84,9 @@ module e203_exu_alu_rglr(
 
   input  [`E203_XLEN-1:0] alu_req_alu_res,
 
+  // --------- add/modify/delete code ---------
+  output alu_i_longpipe,
+
   input  clk,
   input  rst_n
   );
@@ -111,6 +114,19 @@ module e203_exu_alu_rglr(
   assign alu_req_alu_slt  = alu_i_info [`E203_DECINFO_ALU_SLT ];
   assign alu_req_alu_sltu = alu_i_info [`E203_DECINFO_ALU_SLTU];
   assign alu_req_alu_lui  = alu_i_info [`E203_DECINFO_ALU_LUI ];
+
+// --------- add/modify/delete code ---------
+assign alu_i_longpipe = alu_req_alu_add
+| alu_req_alu_sub
+| alu_req_alu_xor
+| alu_req_alu_sll
+| alu_req_alu_srl
+| alu_req_alu_sra
+| alu_req_alu_or 
+| alu_req_alu_and
+| alu_req_alu_slt
+| alu_req_alu_slt
+| alu_req_alu_lui;
 
   assign alu_o_valid = alu_i_valid;
   assign alu_i_ready = alu_o_ready;
