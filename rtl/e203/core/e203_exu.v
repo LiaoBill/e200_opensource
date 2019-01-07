@@ -670,6 +670,7 @@ module e203_exu(
     .lsu_wbck_i_valid   (lsu_o_valid ),
     .lsu_wbck_i_ready   (lsu_o_ready ),
     .lsu_wbck_i_wdat    (lsu_o_wbck_wdat  ),
+    
     //一个input表示当前要写会的东西的ITAG
     .lsu_wbck_i_itag    (lsu_o_wbck_itag  ),
     .lsu_wbck_i_err     (lsu_o_wbck_err   ),
@@ -732,6 +733,7 @@ module e203_exu(
     .x_alu_wbck_i_rdidx   (alu_wbck_o_rdidx ),
     // itag接过来应该是不行的，因为itag线的值会因为后面的指令来了而变化
     .x_alu_wbck_i_itag    (x_alu_wbck_o_itag),
+    .i_longpipe (disp_alu_longpipe),
 
     .alu_wbck_o_valid (x_alu_wbck_o_valid ),
     .alu_wbck_o_ready (x_alu_wbck_o_ready ),

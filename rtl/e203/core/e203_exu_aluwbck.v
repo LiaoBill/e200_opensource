@@ -13,6 +13,7 @@ module e203_exu_aluwbck(
   // Handshake valid 写回握手请求信号
   input longpwbk_lsu_sel,
   input  csr_op,
+  input i_longpipe,
   input  x_alu_wbck_i_valid,
   // Handshake ready 写回握手反馈信号
   output x_alu_wbck_i_ready,
@@ -81,6 +82,7 @@ module e203_exu_aluwbck(
 
 // --------- add/modify/delete code ---------
   wire reg_csr_op;
+  wire reg_i_longpipe;
   wire reg_x_alu_wbck_i_valid;
   wire  [`E203_XLEN-1:0] reg_x_alu_wbck_i_wdat;
   wire [`E203_RFIDX_WIDTH-1:0] reg_x_alu_wbck_i_rdidx;
@@ -89,6 +91,7 @@ module e203_exu_aluwbck(
 
   assign whether_fetch_new = (~oitf_empty) & (reg_x_alu_wbck_i_itag == oitf_ret_ptr) | oitf_empty;
 
+  sirv_gnrl_dfflr #(1) trigger_reg_i_longpipe (whether_fetch_new, i_longpipe, reg_i_longpipe, clk, rst_n);
   sirv_gnrl_dfflr #(1) trigger_reg_csr_op (whether_fetch_new, csr_op, reg_csr_op, clk, rst_n);
   sirv_gnrl_dfflr #(1) trigger_reg_x_alu_wbck_i_valid (whether_fetch_new, x_alu_wbck_i_valid, reg_x_alu_wbck_i_valid, clk, rst_n);
   sirv_gnrl_dfflr #(`E203_XLEN) trigger_reg_x_alu_wbck_i_wdat (whether_fetch_new, x_alu_wbck_i_wdat, reg_x_alu_wbck_i_wdat, clk, rst_n);
@@ -208,7 +211,7 @@ module e203_exu_aluwbck(
   // 为了测试牺牲一下, 写回了才会ready，才去除oitf中的数值
   // assign oitf_ret_ena = wbck_i_valid & wbck_i_ready;
   // 代表向后说我要写回并且后面回复说已经写好了，才将ret_ena设置为true，也就是删掉当前项目
-  assign oitf_ret_ena = wbck_i_valid & wbck_i_ready & (~reg_csr_op);
+  assign oitf_ret_ena = wbck_i_valid & wbck_i_ready & reg_i_longpipe;
 
 endmodule                                      
                                                
