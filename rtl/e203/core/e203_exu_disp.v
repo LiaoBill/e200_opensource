@@ -221,19 +221,30 @@ module e203_exu_disp(
                  //  to make sure the subsequent instruction get correct CSR values, but in our 2-pipeline stage
                  //  implementation, CSR is updated after EXU stage, and subsequent are all executed at EXU stage,
                  //  no chance to got wrong CSR values, so we dont need to worry about this.
+                 // 注意这里,csr说是理论上，CSR数值更新后需要冲刷流水线，但这边说因为是2级，CSR写会数据的时候所有的其他程序还在执行阶段
+                 // 我觉得我们需要了解一下csr
                  (disp_csr ? oitf_empty : 1'b1)
                  // To handle the Fence: just stall dispatch until the OITF is empty
+                 // branch jump
                & (disp_fence_fencei ? oitf_empty : 1'b1)
                  // If it was a WFI instruction commited halt req, then it will stall the disaptch
+                 // wifi 睡眠指令，也就是当前不睡眠
                & (~wfi_halt_exu_req)   
                  // No dependency
+                 // raw and waw
                & (~dep)   
                ////  // If dispatch to ALU as long pipeline, then must check
                ////  //   the OITF is ready
                //// & ((disp_alu & disp_o_alu_longpipe) ? disp_oitf_ready : 1'b1);
                // To cut the critical timing  path from longpipe signal
                // we always assume the LSU will need oitf ready
-               & (disp_alu_longp_prdt ? disp_oitf_ready : 1'b1);
+               // --------- add/modify/delete code ---------这边加了注释
+               // oitf ready, disp_oitf_ready is just meaning oitf is not full
+               // 所以意思说disp_alu_longp_prdt我们要修改一下，让它不单单包含lsu单元，别的部分也要检测oitf是否满了
+               & (disp_alu_longp_prdt ? disp_oitf_ready : 1'b1)
+               // 所以我们要求时刻oitf都是ready(不满)的，不然不能dispatch
+              // --------- add/modify/delete code ---------
+               & disp_oitf_ready;
 
   assign disp_i_valid_pos = disp_condition & disp_i_valid; 
   assign disp_i_ready     = disp_condition & disp_i_ready_pos; 
@@ -258,6 +269,8 @@ module e203_exu_disp(
   // disp_alu_longp_real就是alu里面计算完成的i_longpipe的数值，也就是现在只有乘除法和LS操作
   // 并且alu是ready的，也是我valid的，也就是确定了是要传给alu进行执行的状态
   // 也就是和alu握手完成并且通过alu计算确定是长指令了（现在只有乘除法和LS操作），才会ena
+  // disp_o_alu_valid 必须需要disp_condition为真
+  // 可以加入oitf的一定是可以发射的，所以这边很好得控制了oitf不小心多周期重复写的问题，如果不可以加入，那下周期传入的那个不可加入的命令也会将ena设置为false
   assign disp_oitf_ena = disp_o_alu_valid & disp_o_alu_ready & disp_alu_longp_real;
 
   assign disp_o_alu_imm  = disp_i_imm;

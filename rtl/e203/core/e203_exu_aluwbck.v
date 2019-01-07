@@ -20,6 +20,9 @@ module e203_exu_aluwbck(
   // 写田的寄存器索引值, register index
   input  [`E203_RFIDX_WIDTH-1:0] x_alu_wbck_i_rdidx,
   //这边需要改为alu itag
+  // 关于itag直接打过来的问题，两种情况
+    // 短指令在长指令之前-->这时候itag虽然是长指令，所以我们需要的不是直接连线过来，而是改成寄存器的方式交付过来，现在先直接连线过来，因为还是一个周期执行完了
+    // 长指令在短指令之前-->这时候itag就是短指令
   input  [`E203_ITAG_WIDTH -1:0] x_alu_wbck_i_itag,
 
   // ALU直接提交异常给commit不需要在这边管理异常信息
@@ -84,7 +87,7 @@ module e203_exu_aluwbck(
   // --------- add/modify/delete code ---------模仿上方的写法即可
   // 为了测试先设置为永真
   // wire wbck_ready4alu = (x_alu_wbck_i_itag == oitf_ret_ptr) & (~oitf_empty);
-  wire wbck_ready4alu = 1'b1 | (x_alu_wbck_i_itag == oitf_ret_ptr) & (~oitf_empty);
+  wire wbck_ready4alu = (x_alu_wbck_i_itag == oitf_ret_ptr) & (~oitf_empty);
   wire wbck_sel_alu = x_alu_wbck_i_valid & wbck_ready4alu;
 
   // 异常处理不需要
@@ -183,7 +186,8 @@ module e203_exu_aluwbck(
 
   // 为了测试牺牲一下, 写回了才会ready，才去除oitf中的数值
   // assign oitf_ret_ena = wbck_i_valid & wbck_i_ready;
-  assign oitf_ret_ena = 1'b0 & wbck_i_valid & wbck_i_ready;
+  // 代表向后说我要写回并且后面回复说已经写好了，才将ret_ena设置为true，也就是删掉当前项目
+  assign oitf_ret_ena = wbck_i_valid & wbck_i_ready;
 
 endmodule                                      
                                                

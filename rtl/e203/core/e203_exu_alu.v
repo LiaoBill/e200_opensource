@@ -241,6 +241,9 @@ module e203_exu_alu(
   // 如果没有定义share mul div,那么长指令就代表是agu指令，也就是LS指令
   // 现在是开着的，所以如果是访问内存计算地址的agu指令或者是乘除法都算作是长指令
   assign i_longpipe = (agu_i_longpipe & agu_op)
+  // --------- add/modify/delete code ---------
+                    | (alu_op) // put all alu operation first, into oitf (later will include csr operation)
+  // --------- add/modify/delete code ---------
                    `ifdef E203_SUPPORT_SHARE_MULDIV //{
                     | (mdv_i_longpipe & mdv_op)
                    `endif//E203_SUPPORT_SHARE_MULDIV}

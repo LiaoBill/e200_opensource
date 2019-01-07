@@ -455,6 +455,7 @@ module e203_exu(
     .disp_i_rs3en         (disp_oitf_rs3en),
     .disp_i_rdwen         (disp_oitf_rdwen ),
 
+    // 直接硬链接给oitf,oitf是时刻都知道当前指令的信息的
     .disp_i_rs1idx        (disp_oitf_rs1idx),
     .disp_i_rs2idx        (disp_oitf_rs2idx),
     .disp_i_rs3idx        (disp_oitf_rs3idx),
@@ -714,6 +715,7 @@ module e203_exu(
     .x_alu_wbck_i_ready   (alu_wbck_o_ready ),
     .x_alu_wbck_i_wdat    (alu_wbck_o_wdat  ),
     .x_alu_wbck_i_rdidx   (alu_wbck_o_rdidx ),
+    // itag接过来应该是不行的，因为itag线的值会因为后面的指令来了而变化
     .x_alu_wbck_i_itag    (x_alu_wbck_o_itag),
 
     .alu_wbck_o_valid (x_alu_wbck_o_valid ),
