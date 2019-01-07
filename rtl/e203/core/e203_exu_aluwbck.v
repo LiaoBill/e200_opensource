@@ -87,7 +87,7 @@ module e203_exu_aluwbck(
   // --------- add/modify/delete code ---------模仿上方的写法即可
   // 为了测试先设置为永真
   // wire wbck_ready4alu = (x_alu_wbck_i_itag == oitf_ret_ptr) & (~oitf_empty);
-  wire wbck_ready4alu = (x_alu_wbck_i_itag == oitf_ret_ptr) & (~oitf_empty);
+  wire wbck_ready4alu = 1'b1 | (x_alu_wbck_i_itag == oitf_ret_ptr) & (~oitf_empty);
   wire wbck_sel_alu = x_alu_wbck_i_valid & wbck_ready4alu;
 
   // 异常处理不需要

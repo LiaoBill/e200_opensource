@@ -792,7 +792,11 @@ module e203_exu_alu(
   //     the result (need to write RD), and it is not a long-pipe uop
   //     (need to be write back by its long-pipe write-back, not here)
   //   * Each instruction need to be commited
-  wire o_need_wbck = wbck_o_rdwen & (~i_longpipe) & (~wbck_o_err);
+  // o_need_wbck被设置为0了，因此定义为不需要写回, 而实际上第一个指令是需要写回的，所以造成了等待
+  // --------- add/modify/delete code ---------
+  wire o_need_wbck = wbck_o_rdwen & (~i_longpipe) & (~wbck_o_err)
+                    | alu_op & wbck_o_rdwen & (~wbck_o_err);
+  // --------- add/modify/delete code ---------                    
   wire o_need_cmt  = 1'b1;
   assign o_ready =
            (o_need_cmt  ? cmt_o_ready  : 1'b1)
