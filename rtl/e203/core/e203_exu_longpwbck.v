@@ -130,6 +130,7 @@ module e203_exu_longpwbck(
   wire wbck_i_rdfpu;
   wire wbck_i_err ;
 
+  // 
   assign lsu_wbck_i_ready = wbck_ready4lsu & wbck_i_ready;
 
   assign wbck_i_valid = ({1{wbck_sel_lsu}} & lsu_wbck_i_valid) 

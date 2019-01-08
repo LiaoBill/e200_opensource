@@ -74,6 +74,7 @@ module e203_exu_aluwbck(
   // input  oitf_ret_rdwen,
   // // input  oitf_ret_rdfpu,
   output oitf_ret_ena,
+  output x_whether_fetch_new,
   // --------- add/modify/delete code ---------
   
   input  clk,
@@ -89,14 +90,22 @@ module e203_exu_aluwbck(
   wire  [`E203_ITAG_WIDTH -1:0] reg_x_alu_wbck_i_itag;
   wire whether_fetch_new;
 
+  assign x_whether_fetch_new = whether_fetch_new;
+
   assign whether_fetch_new = (~oitf_empty) & (reg_x_alu_wbck_i_itag == oitf_ret_ptr) | oitf_empty;
 
-  sirv_gnrl_dfflr #(1) trigger_reg_i_longpipe (whether_fetch_new, i_longpipe, reg_i_longpipe, clk, rst_n);
-  sirv_gnrl_dfflr #(1) trigger_reg_csr_op (whether_fetch_new, csr_op, reg_csr_op, clk, rst_n);
-  sirv_gnrl_dfflr #(1) trigger_reg_x_alu_wbck_i_valid (whether_fetch_new, x_alu_wbck_i_valid, reg_x_alu_wbck_i_valid, clk, rst_n);
-  sirv_gnrl_dfflr #(`E203_XLEN) trigger_reg_x_alu_wbck_i_wdat (whether_fetch_new, x_alu_wbck_i_wdat, reg_x_alu_wbck_i_wdat, clk, rst_n);
-  sirv_gnrl_dfflr #(`E203_RFIDX_WIDTH) trigger_reg_x_alu_wbck_i_rdidx (whether_fetch_new, x_alu_wbck_i_rdidx, reg_x_alu_wbck_i_rdidx, clk, rst_n);
-  sirv_gnrl_dfflr #(`E203_ITAG_WIDTH) trigger_reg_x_alu_wbck_i_itag (whether_fetch_new, x_alu_wbck_i_itag, reg_x_alu_wbck_i_itag, clk, rst_n);
+  // sirv_gnrl_dfflr #(1) trigger_reg_i_longpipe (whether_fetch_new, i_longpipe, reg_i_longpipe, clk, rst_n);
+  // sirv_gnrl_dfflr #(1) trigger_reg_csr_op (whether_fetch_new, csr_op, reg_csr_op, clk, rst_n);
+  // sirv_gnrl_dfflr #(1) trigger_reg_x_alu_wbck_i_valid (whether_fetch_new, x_alu_wbck_i_valid, reg_x_alu_wbck_i_valid, clk, rst_n);
+  // sirv_gnrl_dfflr #(`E203_XLEN) trigger_reg_x_alu_wbck_i_wdat (whether_fetch_new, x_alu_wbck_i_wdat, reg_x_alu_wbck_i_wdat, clk, rst_n);
+  // sirv_gnrl_dfflr #(`E203_RFIDX_WIDTH) trigger_reg_x_alu_wbck_i_rdidx (whether_fetch_new, x_alu_wbck_i_rdidx, reg_x_alu_wbck_i_rdidx, clk, rst_n);
+  // sirv_gnrl_dfflr #(`E203_ITAG_WIDTH) trigger_reg_x_alu_wbck_i_itag (whether_fetch_new, x_alu_wbck_i_itag, reg_x_alu_wbck_i_itag, clk, rst_n);
+  assign reg_i_longpipe = i_longpipe;
+  assign reg_csr_op = csr_op;
+  assign reg_x_alu_wbck_i_valid = (wbck_ready4alu) ? x_alu_wbck_i_valid : 1'b1;
+  assign reg_x_alu_wbck_i_wdat = x_alu_wbck_i_wdat;
+  assign reg_x_alu_wbck_i_rdidx = x_alu_wbck_i_rdidx;
+  assign reg_x_alu_wbck_i_itag = x_alu_wbck_i_itag;
 // --------- add/modify/delete code ---------
 
 

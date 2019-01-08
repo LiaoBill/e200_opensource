@@ -533,6 +533,8 @@ module e203_exu(
 
   wire mdv_nob2b;
 
+  wire x_i_longpipe;
+
   // --------- add/modify/delete code ---------
   wire x_csr_op;
 
@@ -553,6 +555,8 @@ module e203_exu(
     .i_valid             (disp_alu_valid   ),
     .i_ready             (disp_alu_ready   ),
     .i_longpipe          (disp_alu_longpipe),
+    // --------- add/modify/delete code ---------
+    .x_i_longpipe  (x_i_longpipe),
     // 直接将由OITF传递过来的队列尾部ITAG传递（oitf->dispatch->exu_alu）
     .i_itag              (disp_alu_itag    ),
     .i_rs1               (disp_alu_rs1     ),
@@ -600,11 +604,11 @@ module e203_exu(
     .cmt_o_buserr        (alu_cmt_buserr),
     .cmt_o_badaddr       (alu_cmt_badaddr),
 
-    .wbck_o_valid        (alu_wbck_o_valid ),
+    .reg_wbck_o_valid        (alu_wbck_o_valid ),
     .wbck_o_ready        (alu_wbck_o_ready ),
-    .wbck_o_wdat         (alu_wbck_o_wdat  ),
-    .wbck_o_rdidx        (alu_wbck_o_rdidx ),
-    .wbck_o_itag        (x_alu_wbck_o_itag),
+    .reg_wbck_o_wdat         (alu_wbck_o_wdat  ),
+    .reg_wbck_o_rdidx        (alu_wbck_o_rdidx ),
+    .reg_wbck_o_itag        (x_alu_wbck_o_itag),
 
     .csr_ena             (csr_ena),
     .csr_idx             (csr_idx),
@@ -633,7 +637,8 @@ module e203_exu(
     .agu_icb_rsp_excl_ok (agu_icb_rsp_excl_ok),
     .agu_icb_rsp_rdata   (agu_icb_rsp_rdata),
     .is_rd_32_x0 (is_rd_32_x0),
-
+    .x_whether_fetch_new (x_whether_fetch_new),
+    .disp_oitf_ena (disp_oitf_ena),
 
     // --------- add/modify/delete code ---------
     .x_csr_op (x_csr_op),
@@ -717,6 +722,7 @@ module e203_exu(
   //////////////////////////////////////////////////////////////
   
   // --------- add/modify/delete code ---------
+  wire x_whether_fetch_new;
   wire x_alu_wbck_o_valid;
   wire x_alu_wbck_o_ready;
   wire [`E203_XLEN-1:0] x_alu_wbck_o_wdat;
@@ -733,7 +739,7 @@ module e203_exu(
     .x_alu_wbck_i_rdidx   (alu_wbck_o_rdidx ),
     // itag接过来应该是不行的，因为itag线的值会因为后面的指令来了而变化
     .x_alu_wbck_i_itag    (x_alu_wbck_o_itag),
-    .i_longpipe (disp_alu_longpipe),
+    .i_longpipe (x_i_longpipe),
 
     .alu_wbck_o_valid (x_alu_wbck_o_valid ),
     .alu_wbck_o_ready (x_alu_wbck_o_ready ),
@@ -749,6 +755,7 @@ module e203_exu(
     // .oitf_ret_rdwen      (oitf_ret_rdwen),
     // // 是否oitf淦出来一个值
     .oitf_ret_ena        (alu_oitf_ret_ena  ),
+    .x_whether_fetch_new (x_whether_fetch_new),
 
     .clk                 (clk          ),
     .rst_n               (rst_n        )

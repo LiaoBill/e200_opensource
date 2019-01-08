@@ -45,6 +45,7 @@ module e203_exu_alu(
 
   output i_longpipe, // Indicate this instruction is
                      //   issued as a long pipe instruction
+  output x_i_longpipe,
 
   `ifdef E203_HAS_CSR_EAI//{
   `ifndef E203_HAS_EAI
@@ -112,12 +113,12 @@ module e203_exu_alu(
 
   //////////////////////////////////////////////////////////////
   // The ALU Write-Back Interface
-  output wbck_o_valid, // Handshake valid
+  output reg_wbck_o_valid, // Handshake valid
   input  wbck_o_ready, // Handshake ready
-  output [`E203_XLEN-1:0] wbck_o_wdat,
-  output [`E203_RFIDX_WIDTH-1:0] wbck_o_rdidx,
+  output [`E203_XLEN-1:0] reg_wbck_o_wdat,
+  output [`E203_RFIDX_WIDTH-1:0] reg_wbck_o_rdidx,
   // --------- add/modify/delete code ---------
-  output [`E203_ITAG_WIDTH-1:0] wbck_o_itag,
+  output [`E203_ITAG_WIDTH-1:0] reg_wbck_o_itag,
 
   input  mdv_nob2b,
 
@@ -160,11 +161,38 @@ module e203_exu_alu(
 
   // --------- add/modify/delete code ---------
   output x_csr_op,
+  input x_whether_fetch_new,
+  input disp_oitf_ena,
 
 
   input  clk,
   input  rst_n
   );
+
+// --------- add/modify/delete code ---------
+  wire wbck_o_valid; // Handshake valid
+  // input  wbck_o_ready, // Handshake ready
+  wire [`E203_XLEN-1:0] wbck_o_wdat;
+  wire [`E203_RFIDX_WIDTH-1:0] wbck_o_rdidx;
+  // --------- add/modify/delete code ---------
+  wire [`E203_ITAG_WIDTH-1:0] wbck_o_itag;
+  
+  wire whether_send_new;
+
+  // assign whether_send_new = wbck_o_ready & wbck_o_valid;
+  assign whether_send_new = disp_oitf_ena & i_longpipe | (~i_longpipe) & i_valid | csr_op ;  //| disp_oitf_ena & alu_op & wbck_o_ready
+  wire whether_valid_change;
+  assign whether_valid_change = wbck_o_ready;
+  sirv_gnrl_dfflr  #(1)  trigger_reg_wbck_o_valid       (whether_valid_change,  wbck_o_valid     ,  reg_wbck_o_valid       ,  clk,  rst_n); 
+  sirv_gnrl_dfflr  #(`E203_XLEN)  trigger_reg_wbck_o_wdat   (whether_send_new,  wbck_o_wdat ,  reg_wbck_o_wdat   ,  clk,  rst_n); 
+  sirv_gnrl_dfflr  #(`E203_RFIDX_WIDTH)  trigger_reg_wbck_o_rdidx  (whether_send_new,  wbck_o_rdidx ,  reg_wbck_o_rdidx   ,  clk,  rst_n); 
+  sirv_gnrl_dfflr  #(`E203_ITAG_WIDTH)  trigger_reg_wbck_o_itag  (whether_send_new,  wbck_o_itag,  reg_wbck_o_itag  ,  clk,  rst_n); 
+  sirv_gnrl_dfflr  #(1)  trigger_x_i_longpipe  (whether_send_new,  i_longpipe,  x_i_longpipe  ,  clk,  rst_n); 
+  // assign reg_wbck_o_wdat = wbck_o_wdat;
+  // assign reg_wbck_o_rdidx = wbck_o_rdidx;
+  // assign reg_wbck_o_itag = wbck_o_itag;
+
+
 
 
   // --------- add/modify/delete code ---------
@@ -653,6 +681,7 @@ module e203_exu_alu(
   wire agu_req_alu = agu_op;// Since AGU may have some other features, so always need ALU datapath
 
   e203_exu_alu_dpath u_e203_exu_alu_dpath(
+    // clear
       .alu_req_alu         (alu_req_alu           ),
       .alu_req_alu_add     (alu_req_alu_add       ),
       .alu_req_alu_sub     (alu_req_alu_sub       ),
